@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">群发短信</string>
+
+
+    <string-array name="titles">
+        <item>短信群发</item>
+        <item>添加模板</item>
+        <item>我的短信模板</item>
+        <item>发送记录</item>
+        <item>使用说明</item>
+        <item>我的</item>
+
+    </string-array>
+
+    <string name="pay">【注：支付宝或微信支付转账页面，请添加备注“开通短信群发：时长”便可，比如“开通短信群发：3个月”，转账成功后稍等片刻即可使用app短信群发功能！如果5分钟内还未开通，请联系客服17304463597！</string>
+    <string name="xieyi">\u3000\u3000本软件只提供群发短信功能，短信收费归运营商收取0.1元/条。本软件禁止用于黄赌毒、威胁恐吓骚扰等违规违法行为！不良行为造成的不良后果均由使用者本人承担，本软件不负任何责任！（本软件任何问题客服qq:390463560）</string>
+
+
+    <string name="app_tip">提示</string>
+    <string name="pay_result_callback_msg" formatted="false">微信支付结果：%s</string>
+    <string name="notfind">未获取到您的设备id,无法进行登录！您可以检查下是否设置了权限！</string>
+    <string name="hasno">您还没有发送记录</string>
+</resources>
