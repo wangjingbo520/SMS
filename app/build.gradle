@@ -1,0 +1,96 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.mob.sdk'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+    defaultConfig {
+        applicationId "com.tools.sms"
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    aaptOptions.cruncherEnabled = false
+    aaptOptions.useNewCruncher = false
+
+    signingConfigs {
+        commonConfig {
+            keyAlias 'sms'
+            keyPassword '123456'
+            storeFile file('sms.jks')
+            storePassword '123456'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.commonConfig
+        }
+        debug {
+            signingConfig signingConfigs.commonConfig
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            // 输出apk名称
+            if (variant.buildType.name.equals('release')) {
+                //  def fileName = defaultConfig.applicationId + "_v" +defaultConfig.versionName + ".apk"
+                def fileName = "群发短信_v" + defaultConfig.versionName + ".apk"
+                outputFileName = fileName
+            }
+        }
+    }
+
+
+    lintOptions {
+        disable 'GoogleAppIndexingWarning'
+        baseline file("lint-baseline.xml")
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+// 在MobSDK的扩展中注册SMSSDK的相关信息
+MobSDK {
+//    domain 'jp'
+    appKey '2d817ccf6d1a5'
+    appSecret '301e870d4662d9f8c455d5c0995ac9bf'
+
+    SMSSDK {
+        // 若使用GUI的自动填充验证码功能，需打开此设置
+        autoSMS true
+    }
+}
+
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.github.hotchemi:permissionsdispatcher:3.1.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:3.1.0"
+    implementation 'me.jessyan:autosize:1.1.2'
+    implementation 'com.mcxiaoke.volley:library:1.0.19'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'com.jakewharton:butterknife:10.2.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.0'
+    implementation project(path: ':lfilepickerlibrary')
+    implementation 'com.android.support:design:27.1.0'
+    implementation 'com.github.didikee:AndroidDonate:0.1.0'
+
+    implementation files('libs/libammsdk.jar')
+}
