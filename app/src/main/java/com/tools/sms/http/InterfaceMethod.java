@@ -21,5 +21,6 @@ public class InterfaceMethod {
     public static final String USER_ADVICE = "user/advice";
     public static final String USER_RELOGIN = "user/reLogin";
     public static final String USER_CHARGE = "user/charge";
+    public static final String USER_UPDATE_APK = "user/downloadApk";
 
 }

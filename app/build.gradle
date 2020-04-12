@@ -93,4 +93,6 @@ dependencies {
     implementation 'com.github.didikee:AndroidDonate:0.1.0'
 
     implementation files('libs/libammsdk.jar')
+
+    implementation 'com.azhon:appupdateX:2.9.0'
 }

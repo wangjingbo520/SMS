@@ -1,2 +1,2 @@
-include ':app','lfilepickerlibrary'
-rootProject.name='SMS'
+include ':app', 'lfilepickerlibrary'
+rootProject.name = 'SMS'

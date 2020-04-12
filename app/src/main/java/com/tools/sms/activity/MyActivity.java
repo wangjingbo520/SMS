@@ -3,8 +3,8 @@ package com.tools.sms.activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -22,18 +22,18 @@ import com.tools.sms.tools.SPUtils;
 import com.tools.sms.tools.ToastUtil;
 import com.tools.sms.tools.Utils;
 import com.tools.sms.views.TitleView;
-import com.tools.sms.views.UpdateDialog;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+
 /**
  * @author w（C）
  * describe
  */
-public class MyActivity extends BaseActivity implements UpdateDialog.LisentenserDilog {
+public class MyActivity extends BaseActivity {
 
     @BindView(R.id.titleView)
     TitleView titleView;
@@ -45,13 +45,9 @@ public class MyActivity extends BaseActivity implements UpdateDialog.Lisentenser
     TextView tvDays;
     @BindView(R.id.tv1)
     TextView tv1;
-    @BindView(R.id.image)
-    ImageView image;
 
     private int serverVersion;
     private int currentVersionCode;
-
-    private UpdateDialog updateDialog;
 
     private boolean isOpenning = false;
 
@@ -68,18 +64,12 @@ public class MyActivity extends BaseActivity implements UpdateDialog.Lisentenser
         params.put("username", SPUtils.getInstance().getString(Constants.USER_NAME));
         RequestHandler.addRequest(Request.Method.POST, this, mHandler, Constants.CODE_RESULT,
                 params, null, false, InterfaceMethod.QUERY_USER_INFO);
-
-        Map<String, String> params1 = new HashMap<>();
-        params1.put("versionCode", Utils.getLocalVersion(this) + "");
-        params1.put("versionName", Utils.getLocalVersionName(this));
-        RequestHandler.addRequest(Request.Method.POST, this, mHandler, Constants.CODE_RESULT,
-                params1, null, false, InterfaceMethod.APDATE);
     }
 
     @Override
     protected void initView() {
-        updateDialog = new UpdateDialog(this, this);
         titleView.setBackfinishListenser(this);
+        tv1.setText("V " + Utils.getLocalVersionName(this));
     }
 
     @Override
@@ -87,6 +77,13 @@ public class MyActivity extends BaseActivity implements UpdateDialog.Lisentenser
         return R.layout.activity_my;
     }
 
+    private void checkVersion() {
+        Map<String, String> params1 = new HashMap<>();
+        params1.put("versionCode", Utils.getLocalVersion(this) + "");
+        params1.put("versionName", Utils.getLocalVersionName(this));
+        RequestHandler.addRequest(Request.Method.POST, this, mHandler, Constants.CODE_RESULT,
+                params1, null, false, InterfaceMethod.APDATE);
+    }
 
     @OnClick({R.id.ll1, R.id.tv_exit, R.id.ll2, R.id.ll3})
     public void onViewClicked(View view) {
@@ -102,12 +99,7 @@ public class MyActivity extends BaseActivity implements UpdateDialog.Lisentenser
                 showExitDialog();
                 break;
             case R.id.ll2:
-                if (serverVersion > currentVersionCode) {
-                    updateDialog.setContent(contetent);
-                    updateDialog.show();
-                } else {
-                    ToastUtil.showMessage("您已经是最新版本");
-                }
+                checkVersion();
                 break;
             case R.id.ll3:
                 startActivity(new Intent(this, AdviceActivity.class));
@@ -169,28 +161,15 @@ public class MyActivity extends BaseActivity implements UpdateDialog.Lisentenser
             }
         } else if (interfaceMethod.equals(InterfaceMethod.APDATE)) {
             VersionApp versionApp = gson.fromJson(response, VersionApp.class);
-            tv1.setText("V " + versionApp.getData().getVersionName());
             currentVersionCode = Utils.getLocalVersion(this);
             serverVersion = versionApp.getData().getVersionCode();
             contetent = versionApp.getData().getVersionDescribed();
             if (serverVersion > currentVersionCode) {
-                image.setVisibility(View.VISIBLE);
-                updateDialog.setUrl(versionApp.getData().getDownUrl());
+                showUpdateDialog(versionApp.getData().getDownUrl()
+                        , versionApp.getData().getVersionDescribed(), versionApp.getData().getVersionName());
             } else {
-                image.setVisibility(View.GONE);
+                ToastUtil.showMessage("您已经是最新版本！");
             }
-        }
-    }
-
-
-    @Override
-    public void update(String url) {
-        Intent intent = new Intent();
-        if (url.startsWith("http://") || url.startsWith("https://")) {
-            intent.setAction("android.intent.action.VIEW");
-            Uri content_url = Uri.parse(url);
-            intent.setData(content_url);
-            startActivity(intent);
         }
     }
 

@@ -1,27 +1,47 @@
 package com.tools.sms.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.KeyEvent;
+import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.azhon.appupdate.config.UpdateConfiguration;
+import com.azhon.appupdate.listener.OnButtonClickListener;
+import com.azhon.appupdate.listener.OnDownloadListener;
+import com.azhon.appupdate.manager.DownloadManager;
 import com.leon.lfilepickerlibrary.LFilePicker;
 import com.tools.sms.R;
 import com.tools.sms.adapter.GridViewRecyclerviewAdapter;
 import com.tools.sms.base.BaseActivity;
+import com.tools.sms.base.Constants;
+import com.tools.sms.bean.VersionApp;
 import com.tools.sms.bean.XLSUserBean;
+import com.tools.sms.http.InterfaceMethod;
+import com.tools.sms.http.RequestHandler;
 import com.tools.sms.tools.ToastUtil;
+import com.tools.sms.tools.Utils;
 import com.tools.sms.views.TitleView;
+import com.tools.sms.views.UpdateDialog;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
+
+import static com.tools.sms.http.InterfaceMethod.USER_UPDATE_APK;
+
 /**
  * @author w（C）
  * describe
  */
-public class HomeActivity extends BaseActivity implements GridViewRecyclerviewAdapter.OnItemClickListener {
+public class HomeActivity extends BaseActivity implements
+        GridViewRecyclerviewAdapter.OnItemClickListener {
 
     @BindView(R.id.recyclerview)
     RecyclerView recyclerview;
@@ -31,6 +51,7 @@ public class HomeActivity extends BaseActivity implements GridViewRecyclerviewAd
     private int REQUESTCODE_FROM_ACTIVITY = 1000;
 
     private int[] imags = {R.mipmap.add, R.mipmap.mb, R.mipmap.mbs, R.mipmap.jl, R.mipmap.sm, R.mipmap.my};
+
 
     @Override
     protected int getContentLayout() {
@@ -42,7 +63,6 @@ public class HomeActivity extends BaseActivity implements GridViewRecyclerviewAd
 
     }
 
-
     @Override
     protected void initView() {
         titleView.setTitle("主页");
@@ -53,6 +73,29 @@ public class HomeActivity extends BaseActivity implements GridViewRecyclerviewAd
                 = new GridViewRecyclerviewAdapter(this, getResources().getStringArray(R.array.titles), imags);
         gridViewRecyclerviewAdapter.setOnItemClickListener(this);
         recyclerview.setAdapter(gridViewRecyclerviewAdapter);
+        checkVersion();
+    }
+
+    private void checkVersion() {
+        Map<String, String> params1 = new HashMap<>();
+        params1.put("versionCode", Utils.getLocalVersion(this) + "");
+        params1.put("versionName", Utils.getLocalVersionName(this));
+        RequestHandler.addRequest(Request.Method.POST, this, mHandler, Constants.CODE_RESULT,
+                params1, null, false, InterfaceMethod.APDATE);
+    }
+
+    @Override
+    public void onSuceess(String response, String interfaceMethod) {
+        super.onSuceess(response, interfaceMethod);
+        if (interfaceMethod.equals(InterfaceMethod.APDATE)) {
+            VersionApp versionApp = gson.fromJson(response, VersionApp.class);
+            int currentVersionCode = Utils.getLocalVersion(this);
+            int serverVersion = versionApp.getData().getVersionCode();
+            if (serverVersion > currentVersionCode) {
+                showUpdateDialog(versionApp.getData().getDownUrl()
+                        , versionApp.getData().getVersionDescribed(), versionApp.getData().getVersionName());
+            }
+        }
     }
 
     @Override
@@ -126,5 +169,6 @@ public class HomeActivity extends BaseActivity implements GridViewRecyclerviewAd
 
         return super.onKeyDown(keyCode, event);
     }
+
 
 }
