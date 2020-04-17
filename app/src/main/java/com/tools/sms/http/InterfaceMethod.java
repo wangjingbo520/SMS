@@ -7,10 +7,10 @@ package com.tools.sms.http;
 public class InterfaceMethod {
 
     //dev
-    // public static final String base_url = "http://192.168.50.12:9090/";
+    public static final String base_url = "http://192.168.43.79:9090/";
 
     //pro
-    public static final String base_url = "http://106.13.102.216/";
+   // public static final String base_url = "http://106.13.102.216/";
 
     public static final String LOGIN = "user/login";
     public static final String EXIT_LOGIN = "user/exitLogin";

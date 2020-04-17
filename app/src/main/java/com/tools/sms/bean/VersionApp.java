@@ -20,6 +20,7 @@ public class VersionApp extends BaseResponse {
         private String appName;
         private String versionDescribed;
         private String downUrl;
+        private String apkName;
 
         public String getDownUrl() {
             return downUrl;
@@ -61,6 +62,15 @@ public class VersionApp extends BaseResponse {
             this.versionDescribed = versionDescribed;
         }
 
+
+        public String getApkName() {
+            return apkName;
+        }
+
+        public void setApkName(String apkName) {
+            this.apkName = apkName;
+        }
+
         @Override
         public String toString() {
             return "DataBean{" +
@@ -69,6 +79,7 @@ public class VersionApp extends BaseResponse {
                     ", appName='" + appName + '\'' +
                     ", versionDescribed='" + versionDescribed + '\'' +
                     ", downUrl='" + downUrl + '\'' +
+                    ", apkName='" + apkName + '\'' +
                     '}';
         }
     }

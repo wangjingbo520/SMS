@@ -1,18 +1,12 @@
 package com.tools.sms.activity;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.KeyEvent;
-import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
-import com.azhon.appupdate.config.UpdateConfiguration;
-import com.azhon.appupdate.listener.OnButtonClickListener;
-import com.azhon.appupdate.listener.OnDownloadListener;
-import com.azhon.appupdate.manager.DownloadManager;
 import com.leon.lfilepickerlibrary.LFilePicker;
 import com.tools.sms.R;
 import com.tools.sms.adapter.GridViewRecyclerviewAdapter;
@@ -25,16 +19,12 @@ import com.tools.sms.http.RequestHandler;
 import com.tools.sms.tools.ToastUtil;
 import com.tools.sms.tools.Utils;
 import com.tools.sms.views.TitleView;
-import com.tools.sms.views.UpdateDialog;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-
-import static com.tools.sms.http.InterfaceMethod.USER_UPDATE_APK;
 
 /**
  * @author w（C）
