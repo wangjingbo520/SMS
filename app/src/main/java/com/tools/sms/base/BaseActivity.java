@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -125,6 +126,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
                 .setOnDownloadListener(this);
 
         manager = DownloadManager.getInstance(this);
+        String message = versionApp.getData().getVersionDescribed().replaceAll(";", "\n");
         manager.setApkName(versionApp.getData().getApkName() + "_" + versionApp.getData().getVersionName() + ".apk")
                 .setApkUrl(InterfaceMethod.base_url + USER_UPDATE_APK)
                 .setSmallIcon(R.mipmap.logo)
@@ -133,7 +135,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
                 .setApkVersionCode(versionApp.getData().getVersionCode())
                 .setApkVersionName(versionApp.getData().getVersionName())
                 .setApkSize(versionApp.getData().getApkSize())
-                .setApkDescription(versionApp.getData().getVersionDescribed())
+                .setApkDescription(message)
                 .download();
     }
 

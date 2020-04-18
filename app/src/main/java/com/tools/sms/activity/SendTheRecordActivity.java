@@ -63,7 +63,7 @@ public class SendTheRecordActivity extends BaseActivity {
     @SuppressLint("SetTextI18n")
     @Override
     protected void initData() {
-        String sql = "select * from " + Constants.TABBLE_RESULT_SEND_;
+        String sql = "select * from " + Constants.TABBLE_RESULT_SEND;
         cursor = DbManager.queryBySQL(db, sql, null);
         list = DbManager.getSendResultList(cursor);
         if (list.size() < 1) {
@@ -160,7 +160,7 @@ public class SendTheRecordActivity extends BaseActivity {
             }
             db.execSQL("DELETE FROM sendresult");
             list.clear();
-            String sql = "select * from " + Constants.TABBLE_RESULT_SEND_;
+            String sql = "select * from " + Constants.TABBLE_RESULT_SEND;
             cursor = DbManager.queryBySQL(db, sql, null);
             list.addAll(DbManager.getSendResultList(cursor));
             if (adapter == null) {

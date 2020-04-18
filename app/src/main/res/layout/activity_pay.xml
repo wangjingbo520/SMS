@@ -179,7 +179,7 @@
             android:layout_weight="2"
             android:background="@drawable/bg_et_kami"
             android:gravity="center_vertical"
-            android:hint="请输入卡密"
+            android:hint="请输入卡号"
             android:paddingLeft="10dp" />
 
         <TextView
@@ -203,7 +203,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="30dp"
         android:layout_marginTop="15dp"
-        android:text="(没有卡密？请点击我，或者扫描以下二维码)"
+        android:text="(没有卡号？请点击我，或者扫描以下二维码)"
         android:textColor="@color/red" />
 
     <ImageView

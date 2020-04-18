@@ -21,7 +21,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String sql_1 = "create table " + Constants.TABBLE_NAME_TEMPLATE + "(" + Constants.ID
                 + " integer primary key autoincrement," + Constants.CONTENT + "," + Constants.TIME + ")";
-        String sql_2 = "create table " + Constants.TABBLE_RESULT_SEND_ +
+        String sql_2 = "create table " + Constants.TABBLE_RESULT_SEND +
                 "(" + Constants.ID + " integer primary key autoincrement," + Constants.CONTENT + ","
                 + Constants.TIME + "," + Constants.TAG + "," + Constants.PHOTO_NUMBER + ")";
 

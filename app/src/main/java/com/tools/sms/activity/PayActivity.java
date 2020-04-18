@@ -79,7 +79,7 @@ public class PayActivity extends BaseActivity {
             // PayActivity.this.dialogChoice();
             String camilo = et_kami.getText().toString().trim();
             if (TextUtils.isEmpty(camilo)) {
-                ToastUtil.showMessage("请先输入卡密....");
+                ToastUtil.showMessage("请先输入卡号....");
                 return;
             }
 

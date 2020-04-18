@@ -75,6 +75,19 @@ public class DbManager {
         }
     }
 
+
+    public static void insertMain(SQLiteDatabase db, SendResultBean resultBean) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dt1 = new SimpleDateFormat("yyyy/M/Mdd");
+        Date date = new Date();
+        String sql = "insert into sendresult(phoneNumber,content,time,tag) " +
+                "values(?,?,?,?)";
+        if (db.isOpen()) {
+            db.execSQL(sql, new String[]{resultBean.getPhoneNumber(), resultBean.getContent(), dt1.format(date), resultBean.getTag()});
+        }
+    }
+
+
+
     public static void updataSendResult(SQLiteDatabase db, int id) {
         String sql = "update sendresult set tag=? where id=?";
         db.execSQL(sql, new String[]{"success", id + ""});

@@ -284,6 +284,8 @@ public class ExcellSendActivity extends BaseActivity {
         service.putExtras(bundle);//发送数据
 
         startService(service);
+
+
     }
 
 

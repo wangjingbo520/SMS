@@ -23,7 +23,7 @@ public class Constants {
 
 
     public static final String TABBLE_NAME_TEMPLATE = "template";
-    public static final String TABBLE_RESULT_SEND_ = "senDetail";
+    public static final String TABBLE_RESULT_SEND = "senDetail";
     public static final String TABBLE_MAIN_SEND = "sendMain";
     public static final String CONTENT = "content";
     public static final String PHOTO_NUMBER = "phoneNumber";

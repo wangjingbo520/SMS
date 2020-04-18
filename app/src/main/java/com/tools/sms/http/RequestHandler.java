@@ -141,22 +141,25 @@ public class RequestHandler {
 
 
     private static void onVolleyErrorResponse(VolleyError error, Handler handler) {
-        Log.e("onfail", "onVolleyResponse: " + error.getMessage());
-        if (error instanceof NoConnectionError || error instanceof com.android.volley.NetworkError) {
-            ToastUtil.showMessage("服务器异常！！");
+        String message = error.getMessage();
+        if (error instanceof com.android.volley.NetworkError) {
+            ToastUtil.showMessage("错误：" + message);
             handler.sendEmptyMessage(0);
         } else if (error instanceof TimeoutError) {
-            ToastUtil.showMessage("连接超时");
+            ToastUtil.showMessage("错误：连接超时，" + message);
             handler.sendEmptyMessage(1);
         } else if (error instanceof AuthFailureError) {
-            ToastUtil.showMessage("身份验证失败！");
+            ToastUtil.showMessage("错误：身份验证失败，" + message);
             handler.sendEmptyMessage(2);
         } else if (error instanceof ParseError) {
             handler.sendEmptyMessage(3);
-            ToastUtil.showMessage("解析错误！");
+            ToastUtil.showMessage("服务器解析错误，" + message);
+            ;
         } else if (error instanceof ServerError) {
             ToastUtil.showMessage("服务器响应错误！");
             handler.sendEmptyMessage(4);
+        } else {
+            ToastUtil.showMessage("error：" + message);
         }
     }
 
