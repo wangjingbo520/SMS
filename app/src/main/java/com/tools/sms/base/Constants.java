@@ -24,16 +24,20 @@ public class Constants {
 
     public static final String TABBLE_NAME_TEMPLATE = "template";
     public static final String TABBLE_RESULT_SEND = "senDetail";
-    public static final String TABBLE_MAIN_SEND = "sendMain";
+
     public static final String CONTENT = "content";
     public static final String PHOTO_NUMBER = "phoneNumber";
     public static final String TIME = "time";
     public static final String TAG = "tag";
-    public static final String SUCESS_SEND = "sucess";
-    public static final String FAIED_SEND = "failed";
+
+    public static final String TABBLE_MAIN_SEND = "sendMain";
+
+    public static final String SUCESS_SEND = "success_count";
+    public static final String FAIED_SEND = "failed_count";
+    public static final String MAIN_ID = "mainId";
 
 
-    public static final String ID = "_id";
+    public static final String ID = "id";
 
 
     /**

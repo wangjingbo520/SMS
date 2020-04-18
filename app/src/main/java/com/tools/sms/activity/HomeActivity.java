@@ -108,8 +108,8 @@ public class HomeActivity extends BaseActivity implements
                 TemplateTextActivity.start(this, 1, false, new XLSUserBean());
                 break;
             case 3:
-                ToastUtil.showMessage("正在开发中，期待下个版本");
-                // startActivity(new Intent(this, SendTheRecordActivity.class));
+                // ToastUtil.showMessage("正在开发中，期待下个版本");
+                startActivity(new Intent(this, SendTheRecordActivity.class));
                 break;
             case 4:
                 ToastUtil.showMessage("正在开发中，期待下个版本");

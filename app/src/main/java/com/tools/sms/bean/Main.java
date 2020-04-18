@@ -6,31 +6,41 @@ package com.tools.sms.bean;
  */
 public class Main {
 
-    private String data;
-    private long sucess;
-    private long failed;
+    private String time;
+    private int sucess;
+    private int failed;
+    private int mainId;
 
-    public String getData() {
-        return data;
+
+    public String getTime() {
+        return time;
     }
 
-    public void setData(String data) {
-        this.data = data;
+    public void setTime(String time) {
+        this.time = time;
     }
 
-    public long getSucess() {
+    public int getMainId() {
+        return mainId;
+    }
+
+    public void setMainId(int mainId) {
+        this.mainId = mainId;
+    }
+
+    public int getSucess() {
         return sucess;
     }
 
-    public void setSucess(long sucess) {
+    public void setSucess(int sucess) {
         this.sucess = sucess;
     }
 
-    public long getFailed() {
+    public int getFailed() {
         return failed;
     }
 
-    public void setFailed(long failed) {
+    public void setFailed(int failed) {
         this.failed = failed;
     }
 }

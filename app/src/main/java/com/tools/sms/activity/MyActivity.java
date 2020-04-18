@@ -51,7 +51,6 @@ public class MyActivity extends BaseActivity {
 
     private boolean isOpenning = false;
 
-    private String contetent = "";
 
     @Override
     protected void initData() {
@@ -163,7 +162,6 @@ public class MyActivity extends BaseActivity {
             VersionApp versionApp = gson.fromJson(response, VersionApp.class);
             currentVersionCode = Utils.getLocalVersion(this);
             serverVersion = versionApp.getData().getVersionCode();
-            contetent = versionApp.getData().getVersionDescribed();
             if (serverVersion > currentVersionCode) {
                 showUpdateDialog(versionApp);
             } else {

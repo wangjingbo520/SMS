@@ -1,5 +1,6 @@
 package com.tools.sms.bean;
 
+import java.lang.ref.PhantomReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -9,21 +10,14 @@ import java.util.Date;
  */
 public class SendResultBean {
 
-    public SendResultBean(String phoneNumber, String content, String tag) {
+    public SendResultBean(String phoneNumber, String content, String tag, int mainId) {
         this.content = content;
         this.phoneNumber = phoneNumber;
         this.time = new SimpleDateFormat("yyyy/M/Mdd").format(new Date());
         this.tag = tag;
+        this.mianId = mainId;
     }
 
-    public SendResultBean(String userId, int id, String content, String time, String tag, String phoneNumber) {
-        this.userId = userId;
-        this.id = id;
-        this.content = content;
-        this.time = time;
-        this.tag = tag;
-        this.phoneNumber = phoneNumber;
-    }
 
     public String getUserId() {
         return userId;
@@ -52,6 +46,8 @@ public class SendResultBean {
     //false 发送失败 true发送成功
     private String tag;
 
+    private int mianId;
+
 
     private String phoneNumber;
 
@@ -73,6 +69,14 @@ public class SendResultBean {
 
     public String getTag() {
         return tag;
+    }
+
+    public int getMianId() {
+        return mianId;
+    }
+
+    public void setMianId(int mianId) {
+        this.mianId = mianId;
     }
 
     public void setTag(String tag) {

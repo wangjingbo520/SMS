@@ -25,6 +25,7 @@ import com.tools.sms.MyApp;
 import com.tools.sms.R;
 import com.tools.sms.base.BaseActivity;
 import com.tools.sms.base.Constants;
+import com.tools.sms.bean.Main;
 import com.tools.sms.bean.SendResultBean;
 import com.tools.sms.bean.UserBean;
 import com.tools.sms.bean.XLSUserBean;
@@ -32,6 +33,7 @@ import com.tools.sms.db.dbs.DbManager;
 import com.tools.sms.http.InterfaceMethod;
 import com.tools.sms.http.RequestHandler;
 import com.tools.sms.service.AppConstants;
+import com.tools.sms.service.EndSendIntentService;
 import com.tools.sms.service.SendSMSService;
 import com.tools.sms.tools.DialogToastUtil;
 import com.tools.sms.tools.FileUtils;
@@ -49,6 +51,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.OnClick;
 
+import static com.tools.sms.base.Constants.FAIED_SEND;
 import static com.tools.sms.base.Constants.NUMBER_SELECTOR_TEMPLATE;
 
 
@@ -95,12 +98,21 @@ public class ExcellSendActivity extends BaseActivity {
 
     private String deviceId = "";
 
+
     /**
      * 是否正在发送短信
      */
     private boolean isSendSms = false;
     private SQLiteDatabase db;
+    private int mainId;
 
+    //是否发送了
+    private volatile boolean hasSendsMS = false;
+
+    private int sucessSize = 0;
+    private int failedSize = 0;
+
+    private Intent mIntent;
 
     public static void start(Context context, String path) {
         Intent starter = new Intent(context, ExcellSendActivity.class);
@@ -135,6 +147,9 @@ public class ExcellSendActivity extends BaseActivity {
             tvStatus.setText("发送进度: 0/" + beans.size());
         }
 
+
+        mIntent = new Intent(this, EndSendIntentService.class);
+
         receiver = new SMSStatusReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.ACTION_SMS_SEND_NUMBER);
@@ -156,6 +171,7 @@ public class ExcellSendActivity extends BaseActivity {
 
         db = DbManager.getInstance(this).getReadableDatabase();
 
+        mainId = DbManager.creatMainId(db);
         infos = new HashMap<>();
 
     }
@@ -247,6 +263,7 @@ public class ExcellSendActivity extends BaseActivity {
         sendSMS(content);
     }
 
+
     private void postcheckIsOpenning() {
         MyApp.setOpenning(0);
         Map<String, String> params = new HashMap<>();
@@ -284,18 +301,23 @@ public class ExcellSendActivity extends BaseActivity {
         service.putExtras(bundle);//发送数据
 
         startService(service);
-
-
     }
 
 
     public class SMSStatusReceiver extends BroadcastReceiver {
-        private int sucessSize = 0;
-        private int failedSize = 0;
 
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            if (sucessSize == 0 && failedSize == 0) {
+                if (!hasSendsMS) {
+                    Main main = new Main();
+                    main.setMainId(mainId);
+                    DbManager.insertMain(db, main);
+                    hasSendsMS = true;
+                }
+            }
+
             if (AppConstants.ACTION_SMS_SEND_NUMBER.equals(action)) {
                 isSendSms = true;
                 tvStatuss.setText("状态：正在发送中..");
@@ -312,13 +334,16 @@ public class ExcellSendActivity extends BaseActivity {
                             infos.put(phoneNumber, "成功");
                             et_status.append(Html.fromHtml("向 "
                                     + phoneNumber + " 发送短信<font color='green'>成功</font><br>"));
-                            new DBTask().execute(new SendResultBean(phoneNumber, content_s, "success"));
+                            new DBTask().execute(new SendResultBean(phoneNumber, content_s, "success", mainId));
                         }
                         sucessSize++;
                         tv_send_result.setText("发送结果：成功" + sucessSize + "条  失败" + failedSize + "条");
                         if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
                             isSendSms = false;
                             tvStatuss.setText("状态：发送结束");
+
+                            updatedMain();
+
                             DialogToastUtil.showDialogToast(ExcellSendActivity.this, "短信已全部发送，总共"
                                     + customizedProgressBar.getMaxCount() + "条，其中成功" + sucessSize + "条,失败" + failedSize + "条");
                         }
@@ -332,13 +357,14 @@ public class ExcellSendActivity extends BaseActivity {
                         if (!infos.containsKey(phoneNumber_1)) {
                             infos.put(phoneNumber_1, "失败");
                             et_status.append(Html.fromHtml("向 " + phoneNumber_1 + " 发送短信<font color='red'>失败</font><br>"));
-                            new DBTask().execute(new SendResultBean(phoneNumber_1, content_f, "failure"));
+                            new DBTask().execute(new SendResultBean(phoneNumber_1, content_f, "failure", mainId));
                         }
                         failedSize++;
                         tv_send_result.setText("成功:" + sucessSize + "条  失败" + failedSize + "条");
                         if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
                             isSendSms = false;
                             tvStatuss.setText("状态：发送结束");
+
                             Toast.makeText(ExcellSendActivity.this.getApplicationContext(), "短信全部发送结束", Toast.LENGTH_LONG).show();
                         }
                         break;
@@ -348,6 +374,7 @@ public class ExcellSendActivity extends BaseActivity {
                 tvStatus.setText("发送进度: " + numberIndex + "/" + beans.size());
 
                 if (numberIndex == customizedProgressBar.getMaxCount() - 1) {
+                    updatedMain();
                     et_status.append("所有号码已发送完毕\n");
                     et_status.append("关闭短信群发服务. \n ----End----\n");
                     tvStatuss.setText("状态：发送结束");
@@ -375,6 +402,12 @@ public class ExcellSendActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        //发送过短信
+        if (hasSendsMS) {
+            updatedMain();
+        }
+
         if (receiver != null) {
             unregisterReceiver(receiver);
         }
@@ -461,4 +494,10 @@ public class ExcellSendActivity extends BaseActivity {
         }
     }
 
+    private void updatedMain() {
+        mIntent.putExtra("mainId", mainId);
+        mIntent.putExtra("sucessSize", sucessSize);
+        mIntent.putExtra("failedSize", failedSize);
+        startService(mIntent);
+    }
 }
