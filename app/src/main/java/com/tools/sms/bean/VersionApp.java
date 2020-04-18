@@ -21,6 +21,15 @@ public class VersionApp extends BaseResponse {
         private String versionDescribed;
         private String downUrl;
         private String apkName;
+        private String apkSize;
+
+        public String getApkSize() {
+            return apkSize;
+        }
+
+        public void setApkSize(String apkSize) {
+            this.apkSize = apkSize;
+        }
 
         public String getDownUrl() {
             return downUrl;

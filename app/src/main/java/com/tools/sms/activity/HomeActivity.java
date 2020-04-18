@@ -82,8 +82,7 @@ public class HomeActivity extends BaseActivity implements
             int currentVersionCode = Utils.getLocalVersion(this);
             int serverVersion = versionApp.getData().getVersionCode();
             if (serverVersion > currentVersionCode) {
-                showUpdateDialog(versionApp.getData().getDownUrl()
-                        , versionApp.getData().getVersionDescribed(), versionApp.getData().getVersionName());
+                showUpdateDialog(versionApp);
             }
         }
     }

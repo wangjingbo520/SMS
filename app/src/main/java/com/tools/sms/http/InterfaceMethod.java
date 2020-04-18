@@ -10,7 +10,9 @@ public class InterfaceMethod {
     public static final String base_url = "http://192.168.43.79:9090/";
 
     //pro
-   // public static final String base_url = "http://106.13.102.216/";
+    // public static final String base_url = "http://106.13.102.216/";
+
+    public static final String PAY_URL = "https://w.url.cn/s/A9SuogJhttps://w.url.cn/s/A9SuogJ";
 
     public static final String LOGIN = "user/login";
     public static final String EXIT_LOGIN = "user/exitLogin";

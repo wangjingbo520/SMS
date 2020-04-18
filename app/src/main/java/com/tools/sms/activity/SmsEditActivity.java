@@ -99,7 +99,8 @@ public class SmsEditActivity extends BaseActivity {
     }
 
 
-    @OnClick({R.id.tv_expand_1, R.id.tv_expand_2, R.id.tv_sure, R.id.tv_date, R.id.tv_time, R.id.tv_expand_3, R.id.tv_expand_4})
+    @OnClick({R.id.tv_expand_1, R.id.tv_expand_2, R.id.tv_sure,
+            R.id.tv_date, R.id.tv_time, R.id.tv_expand_3, R.id.tv_expand_4})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_expand_1:

@@ -19,11 +19,18 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql_1 = "create table " + Constants.TABBLE_NAME_TEMPLATE + "(" + Constants.ID + " integer primary key autoincrement," + Constants.CONTENT + "," + Constants.TIME + ")";
+        String sql_1 = "create table " + Constants.TABBLE_NAME_TEMPLATE + "(" + Constants.ID
+                + " integer primary key autoincrement," + Constants.CONTENT + "," + Constants.TIME + ")";
         String sql_2 = "create table " + Constants.TABBLE_RESULT_SEND_ +
-                "(" + Constants.ID + " integer primary key autoincrement," + Constants.CONTENT + "," + Constants.TIME + "," + Constants.TAG + "," + Constants.PHOTO_NUMBER + ")";
+                "(" + Constants.ID + " integer primary key autoincrement," + Constants.CONTENT + ","
+                + Constants.TIME + "," + Constants.TAG + "," + Constants.PHOTO_NUMBER + ")";
+
+        String sql_3 = "create table " + Constants.TABBLE_MAIN_SEND + "(" + Constants.ID
+                + " integer primary key autoincrement," + Constants.FAIED_SEND + "," + Constants.SUCESS_SEND + "," + Constants.TIME + ")";
+//        db.beginTransaction();
         db.execSQL(sql_1);
         db.execSQL(sql_2);
+        db.execSQL(sql_3);
     }
 
     @Override

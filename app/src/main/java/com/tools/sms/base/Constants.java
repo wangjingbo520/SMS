@@ -19,15 +19,19 @@ public class Constants {
 
 
     public static final String DATABASE_NAME = "info.db";
-    public static final int DATA_VERSION = 1;
+    public static final int DATA_VERSION = 2;
 
 
     public static final String TABBLE_NAME_TEMPLATE = "template";
-    public static final String TABBLE_RESULT_SEND_ = "sendresult";
+    public static final String TABBLE_RESULT_SEND_ = "senDetail";
+    public static final String TABBLE_MAIN_SEND = "sendMain";
     public static final String CONTENT = "content";
     public static final String PHOTO_NUMBER = "phoneNumber";
     public static final String TIME = "time";
     public static final String TAG = "tag";
+    public static final String SUCESS_SEND = "sucess";
+    public static final String FAIED_SEND = "failed";
+
 
     public static final String ID = "_id";
 
@@ -53,14 +57,13 @@ public class Constants {
 
 
     //wxpay appid
-    public static final String WEIXIN_APPID= "";
+    public static final String WEIXIN_APPID = "";
 
     //alipay
     public static final String ALIPAY_APPID = "2021001108674905";
 
 
-
     //device_id
- //   public static final String device_id = "2021001108674905";
+    //   public static final String device_id = "2021001108674905";
 
 }

@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.didikee.donate.AlipayDonate;
 import android.didikee.donate.WeiXinDonate;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.view.View;
@@ -37,6 +38,7 @@ import java.util.Map;
 import butterknife.BindView;
 
 import static com.tools.sms.base.Constants.alipay;
+import static com.tools.sms.http.InterfaceMethod.PAY_URL;
 
 /**
  * @author w（C）
@@ -67,7 +69,7 @@ public class PayActivity extends BaseActivity {
 
     @Override
     protected void initView() {
-        titleView.setTitle("开通VIP");
+        titleView.setTitle("收费标准");
         titleView.setBackfinishListenser(this);
         builder = new AlertDialog.Builder(this);
         builder.setTitle("请选择支付方式");
@@ -83,6 +85,8 @@ public class PayActivity extends BaseActivity {
 
             doPost(camilo);
         });
+
+        findViewById(R.id.tvInto).setOnClickListener(view -> startLLQ());
     }
 
     private void doPost(String camilo) {
@@ -176,6 +180,15 @@ public class PayActivity extends BaseActivity {
         if (hasInstalledAlipayClient) {
             AlipayDonate.startAlipayClient(this, alipay);
         }
+    }
+
+
+    private void startLLQ() {
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.VIEW");
+        Uri content_url = Uri.parse(PAY_URL);
+        intent.setData(content_url);
+        startActivity(intent);
     }
 
 

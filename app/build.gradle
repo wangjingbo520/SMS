@@ -41,7 +41,8 @@ android {
             // 输出apk名称
             if (variant.buildType.name.equals('release')) {
                 //  def fileName = defaultConfig.applicationId + "_v" +defaultConfig.versionName + ".apk"
-                def fileName = "群发短信_v" + defaultConfig.versionName + ".apk"
+                // def fileName = "群发短信_v" + defaultConfig.versionName + ".apk"
+                def fileName = defaultConfig.applicationId + "_v" + defaultConfig.versionName + ".apk"
                 outputFileName = fileName
             }
         }

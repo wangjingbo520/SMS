@@ -165,8 +165,7 @@ public class MyActivity extends BaseActivity {
             serverVersion = versionApp.getData().getVersionCode();
             contetent = versionApp.getData().getVersionDescribed();
             if (serverVersion > currentVersionCode) {
-                showUpdateDialog(versionApp.getData().getDownUrl()
-                        , versionApp.getData().getVersionDescribed(), versionApp.getData().getVersionName());
+                showUpdateDialog(versionApp);
             } else {
                 ToastUtil.showMessage("您已经是最新版本！");
             }

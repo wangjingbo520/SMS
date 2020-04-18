@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.tools.sms.MyApp;
 import com.tools.sms.R;
 import com.tools.sms.activity.LoginActivity;
+import com.tools.sms.bean.VersionApp;
 import com.tools.sms.http.IHandleMessage;
 import com.tools.sms.http.InterfaceMethod;
 import com.tools.sms.http.MyVolleyHandler;
@@ -95,7 +96,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
 
     protected abstract int getContentLayout();
 
-    public void showUpdateDialog(String url, String descride, String versionName) {
+    public void showUpdateDialog(VersionApp versionApp) {
         UpdateConfiguration configuration = new UpdateConfiguration()
                 //输出错误日志
                 .setEnableLog(true)
@@ -116,22 +117,23 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
                 //设置是否提示后台下载toast
                 .setShowBgdToast(false)
                 //设置强制更新
-                .setForcedUpgrade(true)
+                .setForcedUpgrade(false)
                 //设置对话框按钮的点击监听
                 .setButtonClickListener(this)
+
                 //设置下载过程的监听
                 .setOnDownloadListener(this);
 
         manager = DownloadManager.getInstance(this);
-        manager.setApkName(versionName + ".apk")
+        manager.setApkName(versionApp.getData().getApkName() + "_" + versionApp.getData().getVersionName() + ".apk")
                 .setApkUrl(InterfaceMethod.base_url + USER_UPDATE_APK)
                 .setSmallIcon(R.mipmap.logo)
                 .setShowNewerToast(true)
                 .setConfiguration(configuration)
-                .setApkVersionCode(2)
-                .setApkVersionName("2.1.8")
-                .setApkSize("20.4")
-                .setApkDescription(descride)
+                .setApkVersionCode(versionApp.getData().getVersionCode())
+                .setApkVersionName(versionApp.getData().getVersionName())
+                .setApkSize(versionApp.getData().getApkSize())
+                .setApkDescription(versionApp.getData().getVersionDescribed())
                 .download();
     }
 
