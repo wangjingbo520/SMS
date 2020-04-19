@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.SmsManager;
@@ -68,8 +69,6 @@ public class ExcellSendActivity extends BaseActivity {
 
     @BindView(R.id.tvStatus)
     TextView tvStatus;
-    @BindView(R.id.tvStatuss)
-    TextView tvStatuss;
     @BindView(R.id.et_status)
     TextView et_status;
     @BindView(R.id.progress)
@@ -132,7 +131,7 @@ public class ExcellSendActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-       // showExitDialog(this);
+        // showExitDialog(this);
     }
 
     @Override
@@ -172,7 +171,7 @@ public class ExcellSendActivity extends BaseActivity {
                 return;
             }
             progressDialog.show();
-            myHandler.postDelayed(mRunnable, 2000);
+            myHandler.postDelayed(mRunnable, 1000);
             finish();
         });
 
@@ -210,9 +209,9 @@ public class ExcellSendActivity extends BaseActivity {
                 }
 
                 if (hasSendsMS) {
-                    updatedMain();
+                    //updatedMain();
                 }
-                myHandler.postDelayed(mRunnable, 2000);
+                myHandler.postDelayed(mRunnable, 1000);
                 break;
             case R.id.bubble:
                 if (isSendSms) {
@@ -319,7 +318,12 @@ public class ExcellSendActivity extends BaseActivity {
         bundle.putString("content", content);
         service.putExtras(bundle);//发送数据
 
-        startService(service);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(service);
+        } else {
+            startService(service);
+        }
+
     }
 
 
@@ -339,11 +343,10 @@ public class ExcellSendActivity extends BaseActivity {
 
             if (AppConstants.ACTION_SMS_SEND_NUMBER.equals(action)) {
                 isSendSms = true;
-                tvStatuss.setText("状态：正在发送中..");
                 titleView.setTitle("正在发送中...");
                 titleView.setTextColor(Color.RED);
                 if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
-                    tvStatuss.setText("状态：发送结束");
+                    titleView.setTitle("发送结束");
                     isSendSms = false;
                 }
             } else if (AppConstants.ACTION_SMS_SEND_ACTIOIN.equals(action)) {
@@ -362,9 +365,9 @@ public class ExcellSendActivity extends BaseActivity {
                         tv_send_result.setText("发送结果：成功" + sucessSize + "条  失败" + failedSize + "条");
                         if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
                             isSendSms = false;
-                            tvStatuss.setText("状态：发送结束");
+                            titleView.setTitle("发送结束");
 
-                            updatedMain();
+                            //  updatedMain();
 
                             DialogToastUtil.showDialogToast(ExcellSendActivity.this, "短信已全部发送，总共"
                                     + customizedProgressBar.getMaxCount() + "条，其中成功" + sucessSize + "条,失败" + failedSize + "条");
@@ -385,8 +388,7 @@ public class ExcellSendActivity extends BaseActivity {
                         tv_send_result.setText("成功:" + sucessSize + "条  失败" + failedSize + "条");
                         if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
                             isSendSms = false;
-                            tvStatuss.setText("状态：发送结束");
-
+                            titleView.setTitle("发送结束");
                             Toast.makeText(ExcellSendActivity.this.getApplicationContext(), "短信全部发送结束", Toast.LENGTH_LONG).show();
                         }
                         break;
@@ -396,17 +398,17 @@ public class ExcellSendActivity extends BaseActivity {
                 tvStatus.setText("发送进度: " + numberIndex + "/" + beans.size());
 
                 if (numberIndex == customizedProgressBar.getMaxCount() - 1) {
-                    updatedMain();
+                    //  updatedMain();
                     et_status.append("所有号码已发送完毕\n");
                     et_status.append("关闭短信群发服务. \n ----End----\n");
-                    tvStatuss.setText("状态：发送结束");
+                    titleView.setTitle("发送结束");
                     isSendSms = false;
                 }
             } else if (AppConstants.ACTION_SMS_DELIVERED_ACTION.equals(action)) {
                 et_status.append(Html.fromHtml(intent.getStringExtra("number")
                         + " 接收短信<font color='green'>成功</font><br>"));
             } else if ("pause".equals(action)) {
-                tvStatuss.setText("状态：已暂停发送..");
+                titleView.setTitle("暂停发送..");
                 titleView.setTitle("已暂停发送...");
                 titleView.setTextColor(Color.BLACK);
             }
@@ -417,7 +419,12 @@ public class ExcellSendActivity extends BaseActivity {
 
         @Override
         protected Void doInBackground(SendResultBean... sendResultBeans) {
-            DbManager.insertSendResult(db, sendResultBeans[0]);
+            try {
+                DbManager.insertSendResult(db, sendResultBeans[0]);
+                DbManager.updatedMain(db, mainId, sucessSize, failedSize);
+            } catch (Exception ex) {
+
+            }
             return null;
         }
     }
@@ -444,7 +451,7 @@ public class ExcellSendActivity extends BaseActivity {
             return;
         }
         progressDialog.show();
-        myHandler.postDelayed(mRunnable, 2000);
+        myHandler.postDelayed(mRunnable, 1000);
 
     }
 
@@ -504,12 +511,12 @@ public class ExcellSendActivity extends BaseActivity {
         }
     }
 
-    private void updatedMain() {
-        mIntent.putExtra("mainId", mainId);
-        mIntent.putExtra("sucessSize", sucessSize);
-        mIntent.putExtra("failedSize", failedSize);
-        startService(mIntent);
-    }
+//    private void updatedMain() {
+//        mIntent.putExtra("mainId", mainId);
+//        mIntent.putExtra("sucessSize", sucessSize);
+//        mIntent.putExtra("failedSize", failedSize);
+//        startService(mIntent);
+//    }
 
 
 }

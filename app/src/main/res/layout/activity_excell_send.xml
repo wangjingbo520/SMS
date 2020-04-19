@@ -141,15 +141,6 @@
             android:text="发送进度：0/0"
             android:textColor="@color/textColor"
             android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/tvStatuss"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="发送：待发送"
-            android:textColor="@color/theme_color"
-            android:textSize="12sp" />
-
     </LinearLayout>
 
     <com.tools.sms.views.CustomizedProgressBar

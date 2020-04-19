@@ -1,8 +1,10 @@
 package com.tools.sms.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,8 +18,10 @@ import com.tools.sms.base.BaseActivity;
 import com.tools.sms.base.Constants;
 import com.tools.sms.bean.UserBean;
 import com.tools.sms.bean.VersionApp;
+import com.tools.sms.db.dbs.DbManager;
 import com.tools.sms.http.InterfaceMethod;
 import com.tools.sms.http.RequestHandler;
+import com.tools.sms.tools.DataCleanManager;
 import com.tools.sms.tools.SPUtils;
 import com.tools.sms.tools.ToastUtil;
 import com.tools.sms.tools.Utils;
@@ -37,14 +41,18 @@ public class MyActivity extends BaseActivity {
 
     @BindView(R.id.titleView)
     TitleView titleView;
-    @BindView(R.id.tv_type)
-    TextView tv_type;
     @BindView(R.id.tvName)
     TextView tvName;
     @BindView(R.id.tvDays)
     TextView tvDays;
     @BindView(R.id.tv1)
     TextView tv1;
+    @BindView(R.id.tvSize)
+    TextView tvSize;
+    @BindView(R.id.tvVip)
+    TextView tvVip;
+    @BindView(R.id.ivOpen)
+    ImageView ivOpen;
 
     private int serverVersion;
     private int currentVersionCode;
@@ -69,6 +77,12 @@ public class MyActivity extends BaseActivity {
     protected void initView() {
         titleView.setBackfinishListenser(this);
         tv1.setText("V " + Utils.getLocalVersionName(this));
+        try {
+            tvSize.setText(DataCleanManager.getTotalCacheSize(this));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -84,7 +98,7 @@ public class MyActivity extends BaseActivity {
                 params1, null, false, InterfaceMethod.APDATE);
     }
 
-    @OnClick({R.id.ll1, R.id.tv_exit, R.id.ll2, R.id.ll3})
+    @OnClick({R.id.ll1, R.id.tv_exit, R.id.ll2, R.id.ll3, R.id.ll4})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll1:
@@ -103,9 +117,32 @@ public class MyActivity extends BaseActivity {
             case R.id.ll3:
                 startActivity(new Intent(this, AdviceActivity.class));
                 break;
+            case R.id.ll4:
+                show();
+                break;
             default:
                 break;
         }
+    }
+
+    private void show() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示");
+        builder.setMessage("您确定要清除本地短信记录数据吗？");
+        builder.setPositiveButton("确定", (dialogInterface, i) -> {
+            DbManager.deleteTableAndCreateTable();
+            DataCleanManager.clearAllCache(this);
+            try {
+                //只清空了表
+                tvSize.setText("0M");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        });
+        builder.setNegativeButton("取消", (dialogInterface, i) -> {
+        });
+        builder.show();
     }
 
 
@@ -141,21 +178,21 @@ public class MyActivity extends BaseActivity {
             MyApp.getInstance().exit();
         } else if (interfaceMethod.equals(InterfaceMethod.QUERY_USER_INFO)) {
             UserBean userBean = gson.fromJson(response, UserBean.class);
-            tvName.setText("用户名：" + userBean.getData().getUsername());
+            tvName.setText(userBean.getData().getUsername());
             if (userBean.getData().getOpening() == 0) {
-                tv_type.setText("未开通");
+                ivOpen.setVisibility(View.VISIBLE);
                 isOpenning = false;
-                tvDays.setText("0天");
+                tvDays.setText("点我开通VIP");
                 tvDays.setTextColor(getResources().getColor(R.color.red));
-                tv_type.setTextColor(getResources().getColor(R.color.red));
             } else if (userBean.getData().getOpening() == 1) {
-                tv_type.setText("已开通");
+                tvVip.setText("（VIP）");
+                ivOpen.setVisibility(View.INVISIBLE);
+                tvVip.setTextColor(getResources().getColor(R.color.theme_color));
                 isOpenning = true;
                 MyApp.openning = 1;
-                tv_type.setTextColor(getResources().getColor(R.color.theme_color));
                 tvDays.setText(userBean.getData().getRemaining_day() + "天");
+                tvDays.setTextColor(getResources().getColor(R.color.theme_color));
             } else {
-                tv_type.setText("未知");
                 tvDays.setText("未知");
             }
         } else if (interfaceMethod.equals(InterfaceMethod.APDATE)) {

@@ -1,14 +1,18 @@
 package com.tools.sms.service;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.SmsManager;
 import android.util.Log;
 
+import com.tools.sms.R;
+import com.tools.sms.activity.ExcellSendActivity;
 import com.tools.sms.base.Constants;
 import com.tools.sms.bean.UserBean;
 import com.tools.sms.bean.XLSUserBean;
@@ -46,6 +50,18 @@ public class SendSMSService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Notification.Builder builder = new Notification.Builder(this.getApplicationContext());
+        Intent newIntent = new Intent(this, ExcellSendActivity.class);
+        builder.setContentIntent(PendingIntent.getActivity(this, 0, newIntent, 0))
+                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.fasong))
+                .setContentTitle("正在发送")
+                .setSmallIcon(R.mipmap.fasong)
+                .setContentText("短信正在发送中...")
+                .setWhen(System.currentTimeMillis());
+
+        Notification notification = builder.build();
+        notification.defaults = Notification.DEFAULT_SOUND;
+        startForeground(110, notification);
     }
 
     @Override
@@ -190,6 +206,7 @@ public class SendSMSService extends Service {
     public void onDestroy() {
         super.onDestroy();
         isStopService = true;
+        stopForeground(true);
     }
 
 }

@@ -26,7 +26,6 @@ public class MyApp extends Application {
         super.onCreate();
         myApp = this;
 
-
         SPUtils.getInstance().put(Constants.TIEM_INTERVAL, 5);
 
     }
