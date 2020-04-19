@@ -10,7 +10,7 @@ import java.util.Date;
  */
 public class SendResultBean {
 
-    public SendResultBean(String phoneNumber, String content, String tag, int mainId) {
+    public SendResultBean(String phoneNumber, String content, int tag, int mainId) {
         this.content = content;
         this.phoneNumber = phoneNumber;
         this.time = new SimpleDateFormat("yyyy/M/Mdd").format(new Date());
@@ -43,8 +43,7 @@ public class SendResultBean {
 
     private String time;
 
-    //false 发送失败 true发送成功
-    private String tag;
+    private int tag;
 
     private int mianId;
 
@@ -67,9 +66,7 @@ public class SendResultBean {
         this.time = time;
     }
 
-    public String getTag() {
-        return tag;
-    }
+
 
     public int getMianId() {
         return mianId;
@@ -79,10 +76,13 @@ public class SendResultBean {
         this.mianId = mianId;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
+    public int getTag() {
+        return tag;
     }
 
+    public void setTag(int tag) {
+        this.tag = tag;
+    }
 
     public String getPhoneNumber() {
         return phoneNumber;

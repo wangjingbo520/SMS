@@ -139,7 +139,7 @@ public class TemplateTextActivity extends BaseActivity implements Templatedapter
             if (templates != null) {
                 if (templates.get(position) != null) {
                     SQLiteDatabase db = DbManager.getInstance(TemplateTextActivity.this).getWritableDatabase();
-                    int result = db.delete("template", "_id=?", new String[]{String.valueOf(id)});
+                    int result = db.delete("template", "id=?", new String[]{String.valueOf(id)});
                     if (result > 0) {
                         templates.remove(position);
                         templatedapter.notifyDataSetChanged();

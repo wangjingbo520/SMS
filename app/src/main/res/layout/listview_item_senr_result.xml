@@ -21,18 +21,17 @@
 
         <TextView
             android:id="@+id/sucess"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
             android:textColor="@color/textColor"
             android:textSize="@dimen/text_size" />
 
         <TextView
             android:id="@+id/failed"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_marginLeft="20dp"
             android:gravity="center"
             android:textColor="@color/textColor"
             android:textSize="@dimen/text_size" />

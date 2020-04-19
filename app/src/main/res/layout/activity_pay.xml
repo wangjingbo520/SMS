@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="18dp"
         android:layout_marginEnd="25dp">
 
         <LinearLayout
@@ -185,7 +185,7 @@
         <TextView
             android:id="@+id/tv_pay"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="45dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginLeft="20dp"
             android:layout_weight="1.5"
@@ -203,7 +203,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="30dp"
         android:layout_marginTop="15dp"
-        android:text="(没有卡号？请点击我，或者扫描以下二维码)"
+        android:text="(没有卡号？请点击我，或者扫描以下二维码购买卡号)"
         android:textColor="@color/red" />
 
     <ImageView

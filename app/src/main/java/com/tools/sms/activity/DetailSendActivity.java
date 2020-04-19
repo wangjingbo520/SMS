@@ -2,11 +2,22 @@ package com.tools.sms.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ListView;
 
 import com.tools.sms.R;
+import com.tools.sms.adapter.DetailAdapter;
 import com.tools.sms.base.BaseActivity;
+import com.tools.sms.base.Constants;
+import com.tools.sms.bean.SendResultBean;
+import com.tools.sms.db.dbs.DbManager;
+import com.tools.sms.tools.ToastUtil;
 import com.tools.sms.views.TitleView;
+
+import java.util.List;
 
 import butterknife.BindView;
 
@@ -23,6 +34,20 @@ public class DetailSendActivity extends BaseActivity {
     @BindView(R.id.listView)
     ListView listView;
 
+    private SQLiteDatabase db;
+    private Cursor cursor;
+    private List<SendResultBean> totalList;
+
+    private int sum;//总的数据数目
+    private int pageSize = 20; //每页有15条数据
+    private int pageNum; // 一共有多少页
+    private int currentPage = 1; //当期页码
+    private boolean isDivPage; //判断是否分页
+
+    private DetailAdapter detailAdapter;
+
+    private int mainId;
+
     public static void start(Context context, int mainID) {
         Intent starter = new Intent(context, DetailSendActivity.class);
         starter.putExtra("mainID", mainID);
@@ -38,7 +63,46 @@ public class DetailSendActivity extends BaseActivity {
     @Override
     protected void initView() {
         titleView.setTitle("发送详情");
+       // titleView.setRightTitle("一键重发");
         titleView.getBackView().setOnClickListener(v -> finish());
+        db = DbManager.getInstance(this).getReadableDatabase();
+        sum = DbManager.getTotalNum(db, Constants.TABBLE_RESULT_SEND);
+        mainId = getIntent().getIntExtra("mainID", 0);
+        pageNum = (int) Math.ceil(sum / (double) pageSize); //向上取整
+        if (currentPage == 1) {
+            totalList = DbManager.getListByCurrentPage(db, Constants.TABBLE_RESULT_SEND, currentPage, pageSize, mainId);
+        }
+
+        detailAdapter = new DetailAdapter(this, totalList);
+        listView.setAdapter(detailAdapter);
+
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                //已经分页并且当前滚动状态为停止滚动了
+                if (isDivPage && AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState) {
+                    if (currentPage < pageNum) {
+                        currentPage++;
+                        // 根据最新的页码加载获取集合存储到数据源中
+                        totalList.addAll(DbManager.getListByCurrentPage(db, Constants.TABBLE_RESULT_SEND,
+                                currentPage, pageSize, mainId));
+                        detailAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                isDivPage = ((firstVisibleItem + visibleItemCount) == totalItemCount);
+            }
+        });
+
+      //  titleView.getRightView()
+//        titleView.getRightView().setOnClickListener(view -> {
+//            ToastUtil.showMessage("将在下个版本上线");
+//
+//        });
+
 
     }
 

@@ -95,7 +95,7 @@ public class MyActivity extends BaseActivity {
                 ToastUtil.showMessage("您已经开通会员，无需再次开通");
                 break;
             case R.id.tv_exit:
-                showExitDialog();
+                showMyExitDialog();
                 break;
             case R.id.ll2:
                 checkVersion();
@@ -109,7 +109,7 @@ public class MyActivity extends BaseActivity {
     }
 
 
-    private void showExitDialog() {
+    private void showMyExitDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.mipmap.logo);
         builder.setTitle("提示！");
@@ -137,8 +137,8 @@ public class MyActivity extends BaseActivity {
             ToastUtil.showMessage("成功退出");
             SPUtils.getInstance().put(Constants.USER_PASSWORD, "");
             SPUtils.getInstance().put(Constants.XIEYI, 0);
-            MyApp.getInstance().exit();
             startActivity(new Intent(this, LoginActivity.class));
+            MyApp.getInstance().exit();
         } else if (interfaceMethod.equals(InterfaceMethod.QUERY_USER_INFO)) {
             UserBean userBean = gson.fromJson(response, UserBean.class);
             tvName.setText("用户名：" + userBean.getData().getUsername());
@@ -151,7 +151,7 @@ public class MyActivity extends BaseActivity {
             } else if (userBean.getData().getOpening() == 1) {
                 tv_type.setText("已开通");
                 isOpenning = true;
-                MyApp.setOpenning(1);
+                MyApp.openning = 1;
                 tv_type.setTextColor(getResources().getColor(R.color.theme_color));
                 tvDays.setText(userBean.getData().getRemaining_day() + "天");
             } else {

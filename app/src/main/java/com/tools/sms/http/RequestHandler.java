@@ -71,7 +71,7 @@ public class RequestHandler {
         StringRequest request = new StringRequest(method, InterfaceMethod.base_url + interfaceMethod, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.e("onsucess", "onVolleyResponse: " + response);
+                Log.e("onsucess" + method, "onVolleyResponse: " + response);
                 onVolleyResponse(response, handler, what, interfaceMethod);
                 listener.onResponse();
             }

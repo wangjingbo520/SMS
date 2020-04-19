@@ -48,7 +48,7 @@ public class SendTheRecordActivity extends BaseActivity {
     @SuppressLint("SetTextI18n")
     @Override
     protected void initData() {
-        String sql = "select * from " + Constants.TABBLE_MAIN_SEND;
+        String sql = "select * from " + Constants.TABBLE_MAIN_SEND + " order by time desc";
         cursor = DbManager.queryBySQL(db, sql, null);
         list = DbManager.getMainList(cursor);
         if (list.size() < 1) {
@@ -56,7 +56,7 @@ public class SendTheRecordActivity extends BaseActivity {
             tvTotol.setText("发送记录：无");
             return;
         }
-        tvTotol.setText("发送记录：" + list.size() + "次发送");
+        tvTotol.setText("发送记录：" + list.size() + "次");
 
         adapter = new SendResultAdapter(this, list);
         listView.setAdapter(adapter);
@@ -72,19 +72,18 @@ public class SendTheRecordActivity extends BaseActivity {
     protected void initView() {
         titleView.setTitle("发送记录");
         titleView.getBackView().setOnClickListener(v -> finish());
-        titleView.setRightTitle("删除");
+        titleView.setRightTitle("清空");
         builder = new AlertDialog.Builder(this);
         builder.setTitle("提示");
-        builder.setIcon(android.R.drawable.ic_dialog_alert);
+        builder.setIcon(R.mipmap.logo);
         builder.setMessage("确定要删除发送记录吗？");
         db = DbManager.getInstance(this).getReadableDatabase();
         titleView.getRightView().setOnClickListener(v -> {
             delete();
         });
 
-        listView.setOnItemClickListener((adapterView, view, i, l) -> {
-            DetailSendActivity.start(SendTheRecordActivity.this, 0);
-        });
+        listView.setOnItemClickListener((adapterView, view, i, l) ->
+                DetailSendActivity.start(SendTheRecordActivity.this, list.get(i).getMainId()));
     }
 
     @Override
@@ -147,7 +146,19 @@ public class SendTheRecordActivity extends BaseActivity {
                     return;
                 }
             }
-            db.execSQL("DELETE FROM senDetail");
+
+
+            try {
+                db.beginTransaction();
+                db.execSQL("DELETE FROM " + Constants.TABBLE_MAIN_SEND);
+                db.execSQL("DELETE FROM " + Constants.TABBLE_RESULT_SEND);
+                db.setTransactionSuccessful();
+                db.endTransaction();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+
             list.clear();
             String sql = "select * from " + Constants.TABBLE_MAIN_SEND;
             cursor = DbManager.queryBySQL(db, sql, null);

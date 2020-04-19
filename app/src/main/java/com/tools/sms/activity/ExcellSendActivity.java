@@ -1,13 +1,16 @@
 package com.tools.sms.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telephony.SmsManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -51,7 +54,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-import static com.tools.sms.base.Constants.FAIED_SEND;
 import static com.tools.sms.base.Constants.NUMBER_SELECTOR_TEMPLATE;
 
 
@@ -114,6 +116,8 @@ public class ExcellSendActivity extends BaseActivity {
 
     private Intent mIntent;
 
+    private ProgressDialog progressDialog;
+
     public static void start(Context context, String path) {
         Intent starter = new Intent(context, ExcellSendActivity.class);
         starter.putExtra("path", path);
@@ -128,7 +132,7 @@ public class ExcellSendActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        showExitDialog(this);
+       // showExitDialog(this);
     }
 
     @Override
@@ -147,7 +151,8 @@ public class ExcellSendActivity extends BaseActivity {
             tvStatus.setText("发送进度: 0/" + beans.size());
         }
 
-
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("正在退出中...");
         mIntent = new Intent(this, EndSendIntentService.class);
 
         receiver = new SMSStatusReceiver();
@@ -166,6 +171,8 @@ public class ExcellSendActivity extends BaseActivity {
                 ToastUtil.showMessage("后台正在发送短信，请不要退出此页面！！");
                 return;
             }
+            progressDialog.show();
+            myHandler.postDelayed(mRunnable, 2000);
             finish();
         });
 
@@ -173,14 +180,22 @@ public class ExcellSendActivity extends BaseActivity {
 
         mainId = DbManager.creatMainId(db);
         infos = new HashMap<>();
-
     }
+
+    private Runnable mRunnable = new Runnable() {
+        @Override
+        public void run() {
+            progressDialog.dismiss();
+            finish();
+        }
+    };
 
     @Override
     protected int getContentLayout() {
         return R.layout.activity_excell_send;
     }
 
+    private Handler myHandler = new Handler();
 
     @OnClick({R.id.btnSend, R.id.stopSend, R.id.bubble, R.id.Pause})
     public void onViewClicked(View view) {
@@ -189,11 +204,15 @@ public class ExcellSendActivity extends BaseActivity {
                 checkIsOpenning();
                 break;
             case R.id.stopSend:
+                progressDialog.show();
                 if (service != null) {
                     stopService(service);
                 }
-                ToastUtil.showMessage("您已退出短信群发页面....");
-                finish();
+
+                if (hasSendsMS) {
+                    updatedMain();
+                }
+                myHandler.postDelayed(mRunnable, 2000);
                 break;
             case R.id.bubble:
                 if (isSendSms) {
@@ -237,11 +256,11 @@ public class ExcellSendActivity extends BaseActivity {
             return;
         }
 
-        if (MyApp.getOpenning() == 0) {
-            showExitDialog();
+        int status = MyApp.openning;
+        if (status == 0) {
+            showExitDialog(this);
             return;
         }
-
 
         if (TextUtils.isEmpty(device_id)) {
             reLogin("未获取到您的设备id,无法进行登录！您可以检查下是否设置了权限！");
@@ -265,7 +284,7 @@ public class ExcellSendActivity extends BaseActivity {
 
 
     private void postcheckIsOpenning() {
-        MyApp.setOpenning(0);
+        MyApp.openning = 0;
         Map<String, String> params = new HashMap<>();
         String userName = SPUtils.getInstance().getString(Constants.USER_NAME, "");
         if (TextUtils.isEmpty(userName)) {
@@ -321,6 +340,8 @@ public class ExcellSendActivity extends BaseActivity {
             if (AppConstants.ACTION_SMS_SEND_NUMBER.equals(action)) {
                 isSendSms = true;
                 tvStatuss.setText("状态：正在发送中..");
+                titleView.setTitle("正在发送中...");
+                titleView.setTextColor(Color.RED);
                 if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
                     tvStatuss.setText("状态：发送结束");
                     isSendSms = false;
@@ -334,8 +355,9 @@ public class ExcellSendActivity extends BaseActivity {
                             infos.put(phoneNumber, "成功");
                             et_status.append(Html.fromHtml("向 "
                                     + phoneNumber + " 发送短信<font color='green'>成功</font><br>"));
-                            new DBTask().execute(new SendResultBean(phoneNumber, content_s, "success", mainId));
+                            new DBTask().execute(new SendResultBean(phoneNumber, content_s, 1, mainId));
                         }
+
                         sucessSize++;
                         tv_send_result.setText("发送结果：成功" + sucessSize + "条  失败" + failedSize + "条");
                         if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
@@ -357,7 +379,7 @@ public class ExcellSendActivity extends BaseActivity {
                         if (!infos.containsKey(phoneNumber_1)) {
                             infos.put(phoneNumber_1, "失败");
                             et_status.append(Html.fromHtml("向 " + phoneNumber_1 + " 发送短信<font color='red'>失败</font><br>"));
-                            new DBTask().execute(new SendResultBean(phoneNumber_1, content_f, "failure", mainId));
+                            new DBTask().execute(new SendResultBean(phoneNumber_1, content_f, 0, mainId));
                         }
                         failedSize++;
                         tv_send_result.setText("成功:" + sucessSize + "条  失败" + failedSize + "条");
@@ -385,6 +407,8 @@ public class ExcellSendActivity extends BaseActivity {
                         + " 接收短信<font color='green'>成功</font><br>"));
             } else if ("pause".equals(action)) {
                 tvStatuss.setText("状态：已暂停发送..");
+                titleView.setTitle("已暂停发送...");
+                titleView.setTextColor(Color.BLACK);
             }
         }
     }
@@ -401,13 +425,7 @@ public class ExcellSendActivity extends BaseActivity {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-
         //发送过短信
-        if (hasSendsMS) {
-            updatedMain();
-        }
-
         if (receiver != null) {
             unregisterReceiver(receiver);
         }
@@ -415,6 +433,8 @@ public class ExcellSendActivity extends BaseActivity {
         if (service != null) {
             stopService(service);
         }
+
+        super.onDestroy();
     }
 
     @Override
@@ -423,13 +443,15 @@ public class ExcellSendActivity extends BaseActivity {
             ToastUtil.showMessage("后台正在发送短信，请不要退出此页面！！");
             return;
         }
-        super.onBackPressed();
+        progressDialog.show();
+        myHandler.postDelayed(mRunnable, 2000);
+
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == NUMBER_SELECTOR_TEMPLATE) {
+        if (requestCode == NUMBER_SELECTOR_TEMPLATE) {
             if (data != null) {
                 if (data.getStringExtra("content") != null) {
                     String content = data.getStringExtra("content");
@@ -441,19 +463,6 @@ public class ExcellSendActivity extends BaseActivity {
                 }
             }
         }
-    }
-
-
-    private void showExitDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.mipmap.logo);
-        builder.setTitle("提示！");
-        builder.setMessage("对不起，您还没有开通会员，请先进行充值");
-        builder.setPositiveButton("确定", (dialog, which) -> {
-            startActivity(new Intent(this, PayActivity.class));
-        });
-        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
-        builder.show();
     }
 
 
@@ -489,7 +498,8 @@ public class ExcellSendActivity extends BaseActivity {
         } else if (interfaceMethod.equals(InterfaceMethod.QUERY_USER_INFO)) {
             UserBean userBean = gson.fromJson(response, UserBean.class);
             deviceId = userBean.getData().getDevice_id();
-            MyApp.setOpenning(userBean.getData().getOpening());
+            int status = userBean.getData().getOpening();
+            MyApp.openning = status;
             deviceId = userBean.getData().getDevice_id();
         }
     }
@@ -500,4 +510,6 @@ public class ExcellSendActivity extends BaseActivity {
         mIntent.putExtra("failedSize", failedSize);
         startService(mIntent);
     }
+
+
 }

@@ -71,5 +71,9 @@ public class TitleView extends FrameLayout {
         return tv_right;
     }
 
+    public void setTextColor(int color) {
+        tvTitle.setTextColor(color);
+    }
+
 
 }

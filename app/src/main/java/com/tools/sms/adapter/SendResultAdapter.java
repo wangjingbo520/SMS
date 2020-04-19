@@ -62,8 +62,8 @@ public class SendResultAdapter extends BaseAdapter {
             holder = (ViewHolder) arg1.getTag();
         }
 
-        holder.sucess.setText("发送成功：" + getItem(arg0).getSucess());
-        holder.failed.setText("发送失败：" + getItem(arg0).getFailed());
+        holder.sucess.setText("发送成功：" + getItem(arg0).getSucess() + "条");
+        holder.failed.setText("发送失败：" + getItem(arg0).getFailed() + "条");
         holder.time.setText("时间：" + getItem(arg0).getTime());
 
 

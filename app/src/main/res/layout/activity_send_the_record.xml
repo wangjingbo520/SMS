@@ -16,15 +16,16 @@
         android:id="@+id/tvTotol"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:textColor="@color/theme_color"
+        android:background="@color/theme_color"
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:textColor="@color/white"
         android:textSize="15sp" />
 
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="@color/background"
-        android:dividerHeight="1dp" />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

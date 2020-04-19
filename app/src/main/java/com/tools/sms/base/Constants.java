@@ -15,7 +15,6 @@ public class Constants {
     public static final String ONRESPOSE_SUCESS = "Success";
     public static final String ONRESPOSE_FAIL = "Fail";
     public static final int CODE_RESULT = 1002;
-    public static final int CODE_RESULT_2 = 2002;
 
 
     public static final String DATABASE_NAME = "info.db";

@@ -64,7 +64,7 @@ public class AddTemplateActivity extends BaseActivity {
             return;
         }
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat dt1 = new SimpleDateFormat("yyyy/M/Mdd");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dt1 = new SimpleDateFormat("yyyy/MM/dd");
         Date date = new Date();
         String sql = "insert into template(content,time) " +
                 "values(?,?)";

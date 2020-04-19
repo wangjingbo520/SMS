@@ -1,6 +1,7 @@
 package com.tools.sms.base;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -21,6 +22,7 @@ import com.google.gson.Gson;
 import com.tools.sms.MyApp;
 import com.tools.sms.R;
 import com.tools.sms.activity.LoginActivity;
+import com.tools.sms.activity.PayActivity;
 import com.tools.sms.bean.VersionApp;
 import com.tools.sms.http.IHandleMessage;
 import com.tools.sms.http.InterfaceMethod;
@@ -44,8 +46,6 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
     public MyVolleyHandler<BaseActivity> mHandler;
     public Gson gson;
     public String device_id;
-
-    private DownloadManager manager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -125,7 +125,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
                 //设置下载过程的监听
                 .setOnDownloadListener(this);
 
-        manager = DownloadManager.getInstance(this);
+        DownloadManager manager = DownloadManager.getInstance(this);
         String message = versionApp.getData().getVersionDescribed().replaceAll(";", "\n");
         manager.setApkName(versionApp.getData().getApkName() + "_" + versionApp.getData().getVersionName() + ".apk")
                 .setApkUrl(InterfaceMethod.base_url + USER_UPDATE_APK)
@@ -137,6 +137,19 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
                 .setApkSize(versionApp.getData().getApkSize())
                 .setApkDescription(message)
                 .download();
+    }
+
+    public void showExitDialog(Activity mActivity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.mipmap.logo);
+        builder.setTitle("提示！");
+        builder.setMessage("对不起，您还没有开通会员，请先进行充值");
+        builder.setPositiveButton("确定", (dialog, which) -> {
+            Intent intent = new Intent(mActivity, PayActivity.class);
+            startActivityForResult(intent, 1000);
+        });
+        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+        builder.show();
     }
 
 

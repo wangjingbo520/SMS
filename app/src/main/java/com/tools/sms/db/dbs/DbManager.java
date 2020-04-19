@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.tools.sms.MyApp;
 import com.tools.sms.base.Constants;
 import com.tools.sms.bean.Main;
 import com.tools.sms.bean.SendResultBean;
@@ -52,17 +53,19 @@ public class DbManager {
         return list;
     }
 
-    public static List<SendResultBean> getSendResultList(Cursor cursor) {
+    public static List<SendResultBean> cursorToDetail(Cursor cursor) {
         List<SendResultBean> list = new ArrayList<>();
-        while (cursor.moveToNext()) {
-            String content = cursor.getString(cursor.getColumnIndex(Constants.CONTENT));
-            int id = cursor.getInt(cursor.getColumnIndex(Constants.ID));
-            String tag = cursor.getString(cursor.getColumnIndex(Constants.TAG));
-            String phoneNumber = cursor.getString(cursor.getColumnIndex(Constants.PHOTO_NUMBER));
-            int mainId = cursor.getInt(cursor.getColumnIndex(Constants.MAIN_ID));
-            SendResultBean template = new SendResultBean(phoneNumber, content, tag, mainId);
-            template.setId(id);
-            list.add(template);
+        try {
+            while (cursor.moveToNext()) {
+                String content = cursor.getString(cursor.getColumnIndex(Constants.CONTENT));
+                int tag = cursor.getInt(cursor.getColumnIndex(Constants.TAG));
+                String phoneNumber = cursor.getString(cursor.getColumnIndex(Constants.PHOTO_NUMBER));
+                int mainId = cursor.getInt(cursor.getColumnIndex(Constants.MAIN_ID));
+                SendResultBean template = new SendResultBean(phoneNumber, content, tag, mainId);
+                list.add(template);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         return list;
     }
@@ -75,9 +78,11 @@ public class DbManager {
             int success_count = cursor.getInt(cursor.getColumnIndex(Constants.SUCESS_SEND));
             int failed_count = cursor.getInt(cursor.getColumnIndex(Constants.FAIED_SEND));
             String time = cursor.getString(cursor.getColumnIndex(Constants.TIME));
+            int mainId = cursor.getInt(cursor.getColumnIndex(Constants.MAIN_ID));
             main.setSucess(success_count);
             main.setFailed(failed_count);
             main.setTime(time);
+            main.setMainId(mainId);
             list.add(main);
         }
         return list;
@@ -91,7 +96,7 @@ public class DbManager {
                 "values(?,?,?,?,?)";
         if (db.isOpen()) {
             db.execSQL(sql, new String[]{resultBean.getPhoneNumber(), resultBean.getContent()
-                    , dt1.format(date), resultBean.getTag(), resultBean.getMianId() + ""});
+                    , dt1.format(date), resultBean.getTag() + "", resultBean.getMianId() + ""});
         }
     }
 
@@ -153,15 +158,19 @@ public class DbManager {
         return count;
     }
 
-//    //当前页码数据的集合
-//    public static List<Person> getListByCurrentPage(SQLiteDatabase db, String table_name, int currentPage, int pageSize) {
-//        int index = (currentPage - 1) * pageSize; // 获取当前页码第一条数据的下标
-//        Cursor cursor = null;
-//        if (db != null) {
-//            String sql = "select * from " + table_name + " limit ?,?";  // 两个参数，一个是当前页的第一个数据下标，第二个是当前页的数量
-//            cursor = db.rawQuery(sql, new String[]{index + "", pageSize + ""});
-//        }
-//        return cursorToPerson(cursor);
-//    }
+
+    public static List<SendResultBean> getListByCurrentPage(SQLiteDatabase db, String table_name
+            , int currentPage, int pageSize, int mainId) {
+        int index = (currentPage - 1) * pageSize; // 获取当前页码第一条数据的下标
+        Cursor cursor = null;
+        if (db != null) {
+            // 两个参数，一个是当前页的第一个数据下标，第二个是当前页的数量
+            String sql = "select * from " + table_name + " where mainId='" + mainId + "' limit ?,?";
+            cursor = db.rawQuery(sql, new String[]{index + "", pageSize + ""});
+            return cursorToDetail(cursor);
+        }
+
+        return new ArrayList<>();
+    }
 
 }

@@ -35,6 +35,7 @@ import cn.smssdk.SMSSDK;
 import cn.smssdk.gui.RegisterPage;
 
 import static com.tools.sms.base.Constants.USER_ID;
+
 /**
  * @author w（C）
  * describe
@@ -143,7 +144,7 @@ public class LoginActivity extends BaseActivity implements EditDialog.Lisentense
                 SPUtils.getInstance().put(Constants.USER_NAME, userBean.getData().getUsername());
                 SPUtils.getInstance().put(USER_ID, userBean.getData().getUser_id());
                 SPUtils.getInstance().put(Constants.USER_PASSWORD, etPasword.getText().toString().trim());
-                MyApp.setOpenning(userBean.getData().getOpening());
+                MyApp.openning = userBean.getData().getOpening();
 
                 startActivity(new Intent(this, HomeActivity.class));
                 finish();
@@ -173,7 +174,7 @@ public class LoginActivity extends BaseActivity implements EditDialog.Lisentense
             SPUtils.getInstance().put(Constants.USER_NAME, userBean.getData().getUsername());
             SPUtils.getInstance().put(USER_ID, userBean.getData().getUser_id());
             SPUtils.getInstance().put(Constants.USER_PASSWORD, etPasword.getText().toString().trim());
-            MyApp.setOpenning(userBean.getData().getOpening());
+            MyApp.openning = userBean.getData().getOpening();
 
             startActivity(new Intent(this, HomeActivity.class));
             finish();
