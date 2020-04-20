@@ -91,6 +91,6 @@ public class Templatedapter extends RecyclerView.Adapter<Templatedapter.ViewHold
     }
 
     public interface OnItemLongClickListenser {
-        void onItemLongClick(int id,int postion);
+        void onItemLongClick(long id,int postion);
     }
 }

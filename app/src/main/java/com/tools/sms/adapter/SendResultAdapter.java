@@ -1,9 +1,6 @@
 package com.tools.sms.adapter;
 
 import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.Intent;
-import android.telephony.SmsManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -11,10 +8,7 @@ import android.widget.TextView;
 
 import com.tools.sms.R;
 import com.tools.sms.bean.Main;
-import com.tools.sms.bean.SendResultBean;
-import com.tools.sms.service.AppConstants;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

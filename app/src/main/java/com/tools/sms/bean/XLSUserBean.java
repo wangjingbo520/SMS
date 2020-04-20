@@ -1,13 +1,7 @@
 package com.tools.sms.bean;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-/**
- * @author wjb
- * describe
- */
 public class XLSUserBean implements Serializable {
     private String phoneNumber;
 

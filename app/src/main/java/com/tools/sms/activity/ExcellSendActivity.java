@@ -1,14 +1,13 @@
 package com.tools.sms.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,20 +24,23 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.android.volley.Request;
+import com.raizlabs.android.dbflow.sql.language.NameAlias;
+import com.raizlabs.android.dbflow.sql.language.OrderBy;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.tools.sms.MyApp;
 import com.tools.sms.R;
 import com.tools.sms.base.BaseActivity;
 import com.tools.sms.base.Constants;
 import com.tools.sms.bean.Main;
-import com.tools.sms.bean.SendResultBean;
+import com.tools.sms.bean.Main_Table;
+import com.tools.sms.bean.SendReultBean;
 import com.tools.sms.bean.UserBean;
 import com.tools.sms.bean.XLSUserBean;
-import com.tools.sms.db.dbs.DbManager;
 import com.tools.sms.http.InterfaceMethod;
 import com.tools.sms.http.RequestHandler;
 import com.tools.sms.service.AppConstants;
-import com.tools.sms.service.EndSendIntentService;
 import com.tools.sms.service.SendSMSService;
+import com.tools.sms.threadpool.EasyThread;
 import com.tools.sms.tools.DialogToastUtil;
 import com.tools.sms.tools.FileUtils;
 import com.tools.sms.tools.SPUtils;
@@ -48,8 +50,11 @@ import com.tools.sms.views.BubbleTextView;
 import com.tools.sms.views.CustomizedProgressBar;
 import com.tools.sms.views.TitleView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -90,7 +95,6 @@ public class ExcellSendActivity extends BaseActivity {
 
     private ArrayList<XLSUserBean> beans;
 
-
     private Intent service;
 
     private SMSStatusReceiver receiver;
@@ -99,13 +103,11 @@ public class ExcellSendActivity extends BaseActivity {
 
     private String deviceId = "";
 
-
     /**
      * 是否正在发送短信
      */
     private boolean isSendSms = false;
-    private SQLiteDatabase db;
-    private int mainId;
+
 
     //是否发送了
     private volatile boolean hasSendsMS = false;
@@ -113,9 +115,13 @@ public class ExcellSendActivity extends BaseActivity {
     private int sucessSize = 0;
     private int failedSize = 0;
 
-    private Intent mIntent;
-
     private ProgressDialog progressDialog;
+
+    private EasyThread executor = null;
+
+    private Main main;
+
+    private List<Main> tempMainList;
 
     public static void start(Context context, String path) {
         Intent starter = new Intent(context, ExcellSendActivity.class);
@@ -128,16 +134,16 @@ public class ExcellSendActivity extends BaseActivity {
         postcheckIsOpenning();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // showExitDialog(this);
-    }
 
     @Override
     protected void initView() {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 , WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        executor = EasyThread.Builder
+                .createFixed(4)
+                .setPriority(Thread.MAX_PRIORITY)
+                .build();
 
         path = getIntent().getStringExtra("path");
 
@@ -152,7 +158,7 @@ public class ExcellSendActivity extends BaseActivity {
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("正在退出中...");
-        mIntent = new Intent(this, EndSendIntentService.class);
+
 
         receiver = new SMSStatusReceiver();
         IntentFilter filter = new IntentFilter();
@@ -175,9 +181,19 @@ public class ExcellSendActivity extends BaseActivity {
             finish();
         });
 
-        db = DbManager.getInstance(this).getReadableDatabase();
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();
+        tempMainList = SQLite.select().from(Main.class).orderBy(Main_Table.mainId, false).queryList();
 
-        mainId = DbManager.creatMainId(db);
+        main = new Main();
+        main.setTime(dt1.format(date));
+
+        if (tempMainList.size() == 0) {
+            main.setMainId(1);
+        } else {
+            main.setMainId(tempMainList.get(0).getMainId() + 1);
+        }
+
         infos = new HashMap<>();
     }
 
@@ -332,15 +348,6 @@ public class ExcellSendActivity extends BaseActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (sucessSize == 0 && failedSize == 0) {
-                if (!hasSendsMS) {
-                    Main main = new Main();
-                    main.setMainId(mainId);
-                    DbManager.insertMain(db, main);
-                    hasSendsMS = true;
-                }
-            }
-
             if (AppConstants.ACTION_SMS_SEND_NUMBER.equals(action)) {
                 isSendSms = true;
                 titleView.setTitle("正在发送中...");
@@ -358,17 +365,14 @@ public class ExcellSendActivity extends BaseActivity {
                             infos.put(phoneNumber, "成功");
                             et_status.append(Html.fromHtml("向 "
                                     + phoneNumber + " 发送短信<font color='green'>成功</font><br>"));
-                            new DBTask().execute(new SendResultBean(phoneNumber, content_s, 1, mainId));
+                            sucessSize++;
+                            startThread(content_s, phoneNumber, sucessSize, failedSize, 1);
                         }
 
-                        sucessSize++;
                         tv_send_result.setText("发送结果：成功" + sucessSize + "条  失败" + failedSize + "条");
                         if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
                             isSendSms = false;
                             titleView.setTitle("发送结束");
-
-                            //  updatedMain();
-
                             DialogToastUtil.showDialogToast(ExcellSendActivity.this, "短信已全部发送，总共"
                                     + customizedProgressBar.getMaxCount() + "条，其中成功" + sucessSize + "条,失败" + failedSize + "条");
                         }
@@ -382,9 +386,16 @@ public class ExcellSendActivity extends BaseActivity {
                         if (!infos.containsKey(phoneNumber_1)) {
                             infos.put(phoneNumber_1, "失败");
                             et_status.append(Html.fromHtml("向 " + phoneNumber_1 + " 发送短信<font color='red'>失败</font><br>"));
-                            new DBTask().execute(new SendResultBean(phoneNumber_1, content_f, 0, mainId));
+
+                            SendReultBean sendReultBean = new SendReultBean();
+                            sendReultBean.setContent(content_f);
+                            sendReultBean.setPhoneNumber(phoneNumber_1);
+                            sendReultBean.setMianId(main.getMainId());
+                            sendReultBean.setTag(0);
+                            failedSize++;
+                            startThread(content_f, phoneNumber_1, sucessSize, failedSize, 0);
                         }
-                        failedSize++;
+
                         tv_send_result.setText("成功:" + sucessSize + "条  失败" + failedSize + "条");
                         if (failedSize + sucessSize == customizedProgressBar.getMaxCount()) {
                             isSendSms = false;
@@ -412,20 +423,6 @@ public class ExcellSendActivity extends BaseActivity {
                 titleView.setTitle("已暂停发送...");
                 titleView.setTextColor(Color.BLACK);
             }
-        }
-    }
-
-    private class DBTask extends AsyncTask<SendResultBean, Void, Void> {
-
-        @Override
-        protected Void doInBackground(SendResultBean... sendResultBeans) {
-            try {
-                DbManager.insertSendResult(db, sendResultBeans[0]);
-                DbManager.updatedMain(db, mainId, sucessSize, failedSize);
-            } catch (Exception ex) {
-
-            }
-            return null;
         }
     }
 
@@ -511,12 +508,26 @@ public class ExcellSendActivity extends BaseActivity {
         }
     }
 
-//    private void updatedMain() {
-//        mIntent.putExtra("mainId", mainId);
-//        mIntent.putExtra("sucessSize", sucessSize);
-//        mIntent.putExtra("failedSize", failedSize);
-//        startService(mIntent);
-//    }
+    private boolean isSaveMain = false;
 
+    private void startThread(String content, String phoneNumber, int sucessSize, int failedSize, int tag) {
+        executor.execute(() -> {
+            SendReultBean reultBean = new SendReultBean();
+            reultBean.setContent(content);
+            reultBean.setMianId(main.getMainId());
+            reultBean.setTag(tag);
+            reultBean.setPhoneNumber(phoneNumber);
+            reultBean.save();
+
+            main.setSucess(sucessSize);
+            main.setFailed(failedSize);
+            if (isSaveMain) {
+                main.update();
+            } else {
+                main.save();
+                isSaveMain = true;
+            }
+        });
+    }
 
 }

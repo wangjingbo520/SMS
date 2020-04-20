@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.mob.sdk'
 
+def dbflow_version = "4.2.4"
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -92,4 +94,9 @@ dependencies {
     implementation project(path: ':lfilepickerlibrary')
     implementation 'com.android.support:design:27.1.0'
     implementation 'com.azhon:appupdateX:2.9.0'
+
+    annotationProcessor "com.github.Raizlabs.DBFlow:dbflow-processor:${dbflow_version}"
+    implementation "com.github.Raizlabs.DBFlow:dbflow-core:${dbflow_version}"
+    implementation "com.github.Raizlabs.DBFlow:dbflow-rx:${dbflow_version}"
+    implementation "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"
 }

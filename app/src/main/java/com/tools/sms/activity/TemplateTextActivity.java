@@ -3,30 +3,24 @@ package com.tools.sms.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
-import android.view.View;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.tools.sms.R;
 import com.tools.sms.adapter.Templatedapter;
 import com.tools.sms.base.BaseActivity;
-import com.tools.sms.base.Constants;
-import com.tools.sms.bean.Template;
 import com.tools.sms.bean.XLSUserBean;
-import com.tools.sms.db.dbs.DbManager;
+import com.tools.sms.bean.Template;
 import com.tools.sms.tools.ToastUtil;
 import com.tools.sms.views.TitleView;
 
 import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.tools.sms.base.Constants.NUMBER_SELECTOR_TEMPLATE;
@@ -79,11 +73,8 @@ public class TemplateTextActivity extends BaseActivity implements Templatedapter
     @Override
     protected void onResume() {
         super.onResume();
-        SQLiteDatabase db = DbManager.getInstance(this).getReadableDatabase();
-        String sql = "select * from " + Constants.TABBLE_NAME_TEMPLATE;
-        Cursor cursor = DbManager.queryBySQL(db, sql, null);
-        templates = DbManager.getTemplate(cursor);
-        templatedapter = new Templatedapter(this, templates);
+        this.templates = SQLite.select().from(Template.class).queryList();
+        templatedapter = new Templatedapter(this, this.templates);
         recyclerview.setAdapter(templatedapter);
 
         if (tag == 1) {
@@ -133,18 +124,29 @@ public class TemplateTextActivity extends BaseActivity implements Templatedapter
         }
     }
 
+
+    @OnClick(R.id.tv_add)
+    public void onViewClicked() {
+        if (tag == 2) {
+            SmsEditActivity.startXLS(this, xlsUserBean);
+        } else {
+            SmsEditActivity.start(this);
+        }
+
+    }
+
     @Override
-    public void onItemLongClick(int id, int position) {
+    public void onItemLongClick(long id, int position) {
         builder.setPositiveButton("确定", (dialog, which) -> {
             if (templates != null) {
                 if (templates.get(position) != null) {
-                    SQLiteDatabase db = DbManager.getInstance(TemplateTextActivity.this).getWritableDatabase();
-                    int result = db.delete("template", "id=?", new String[]{String.valueOf(id)});
-                    if (result > 0) {
-                        templates.remove(position);
-                        templatedapter.notifyDataSetChanged();
-                        ToastUtil.showMessage("删除成功");
+                    if (templates.size() > 0) {
+                        templates.get(position).delete();
                     }
+
+                    templates.remove(position);
+                    templatedapter.notifyDataSetChanged();
+                    ToastUtil.showMessage("删除成功");
                 }
             }
             dialog.dismiss();
@@ -155,16 +157,5 @@ public class TemplateTextActivity extends BaseActivity implements Templatedapter
             finish();
         });
         builder.show();
-    }
-
-
-    @OnClick(R.id.tv_add)
-    public void onViewClicked() {
-        if (tag == 2) {
-            SmsEditActivity.startXLS(this, xlsUserBean);
-        } else {
-            SmsEditActivity.start(this);
-        }
-
     }
 }

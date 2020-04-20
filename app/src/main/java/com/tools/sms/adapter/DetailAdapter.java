@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.tools.sms.R;
-import com.tools.sms.bean.SendResultBean;
+import com.tools.sms.bean.SendReultBean;
 
 import java.util.List;
 
@@ -18,14 +18,14 @@ import java.util.List;
  */
 public class DetailAdapter extends BaseAdapter {
     private Context context;
-    private List<SendResultBean> list;
+    private List<SendReultBean> list;
 
-    public DetailAdapter(Context context, List<SendResultBean> list) {
+    public DetailAdapter(Context context, List<SendReultBean> list) {
         this.context = context;
         this.list = list;
     }
 
-    public void setList(List<SendResultBean> list) {
+    public void setList(List<SendReultBean> list) {
         this.list = list;
     }
 

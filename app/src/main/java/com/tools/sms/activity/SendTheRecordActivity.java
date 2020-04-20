@@ -3,22 +3,31 @@ package com.tools.sms.activity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.IntentFilter;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.raizlabs.android.dbflow.config.FlowManager;
+import com.raizlabs.android.dbflow.sql.language.NameAlias;
+import com.raizlabs.android.dbflow.sql.language.OrderBy;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
+import com.raizlabs.android.dbflow.sql.language.property.IProperty;
+import com.raizlabs.android.dbflow.structure.database.DatabaseWrapper;
+import com.raizlabs.android.dbflow.structure.database.transaction.ITransaction;
+import com.tools.sms.AppDatabase;
 import com.tools.sms.R;
 import com.tools.sms.adapter.SendResultAdapter;
 import com.tools.sms.base.BaseActivity;
-import com.tools.sms.base.Constants;
 import com.tools.sms.bean.Main;
-import com.tools.sms.db.dbs.DbManager;
+import com.tools.sms.bean.Main_Table;
+import com.tools.sms.bean.SendReultBean;
+import com.tools.sms.bean.SendReultBean_Table;
 import com.tools.sms.service.AppConstants;
 import com.tools.sms.tools.ToastUtil;
 import com.tools.sms.views.TitleView;
 
 import java.util.List;
+import java.util.Random;
 
 import butterknife.BindView;
 
@@ -38,19 +47,21 @@ public class SendTheRecordActivity extends BaseActivity {
 
     private SendResultAdapter adapter;
 
-    //  private SMSStatusReceiver receiver;
-
-    private SQLiteDatabase db;
-    private Cursor cursor;
 
     private AlertDialog.Builder builder;
 
     @SuppressLint("SetTextI18n")
     @Override
     protected void initData() {
-        String sql = "select * from " + Constants.TABBLE_MAIN_SEND + " order by time desc";
-        cursor = DbManager.queryBySQL(db, sql, null);
-        list = DbManager.getMainList(cursor);
+        OrderBy orderBy = OrderBy.fromNameAlias(NameAlias.of("mainId")).descending();
+        list = SQLite.select()
+                .from(Main.class).orderBy(orderBy)
+                .queryList();
+
+        for (int i = 0; i < list.size(); i++) {
+            Log.e("====>", "initData: "+list.get(i).toString() );
+        }
+
         if (list.size() < 1) {
             ToastUtil.showMessage(getString(R.string.hasno));
             tvTotol.setText("发送记录：无");
@@ -60,12 +71,10 @@ public class SendTheRecordActivity extends BaseActivity {
 
         adapter = new SendResultAdapter(this, list);
         listView.setAdapter(adapter);
-        //  receiver = new SMSStatusReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.ACTION_SMS_SEND_NUMBER);
         filter.addAction(AppConstants.ACTION_SMS_DELIVERED_ACTION);
         filter.addAction(AppConstants.ACTION_SMS_SEND_ACTIOIN);
-        //   registerReceiver(receiver, filter);
     }
 
     @Override
@@ -77,7 +86,6 @@ public class SendTheRecordActivity extends BaseActivity {
         builder.setTitle("提示");
         builder.setIcon(R.mipmap.logo);
         builder.setMessage("确定要删除发送记录吗？");
-        db = DbManager.getInstance(this).getReadableDatabase();
         titleView.getRightView().setOnClickListener(v -> {
             delete();
         });
@@ -91,52 +99,6 @@ public class SendTheRecordActivity extends BaseActivity {
         return R.layout.activity_send_the_record;
     }
 
-//    public class SMSStatusReceiver extends BroadcastReceiver {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            String action = intent.getAction();
-//            if (AppConstants.ACTION_SMS_SEND_NUMBER.equals(action)) {
-//                ToastUtil.showMessage("正在发送中...");
-//            } else if (AppConstants.ACTION_SMS_SEND_ACTIOIN.equals(action)) {
-//                switch (getResultCode()) {
-//                    case Activity.RESULT_OK:
-//                        ToastUtil.showMessage("向" + intent.getStringExtra("number") + " 发送短信成功");
-//                        if (adapter != null) {
-//                            if (adapter.index != -1) {
-//                                DbManager.updataSendResult(db, list.get(adapter.index).getId());
-//                                list.get(adapter.index).setTag("sucess");
-//                                adapter.notifyDataSetChanged();
-//                            }
-//                        }
-//                        break;
-//                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-//                    case SmsManager.RESULT_ERROR_RADIO_OFF:
-//                    case SmsManager.RESULT_ERROR_NULL_PDU:
-//                    default:
-//                        ToastUtil.showMessage("向" + intent.getStringExtra("number") + " 发送失败");
-//                        break;
-//                }
-//            }
-//        }
-//    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-//        if (receiver != null) {
-//            unregisterReceiver(receiver);
-//        }
-
-        if (db != null) {
-            db.close();
-        }
-
-        if (cursor != null) {
-            cursor.close();
-        }
-    }
-
 
     private void delete() {
         builder.setPositiveButton("确定", (dialog, which) -> {
@@ -147,22 +109,17 @@ public class SendTheRecordActivity extends BaseActivity {
                 }
             }
 
-
-            try {
-                db.beginTransaction();
-                db.execSQL("DELETE FROM " + Constants.TABBLE_MAIN_SEND);
-                db.execSQL("DELETE FROM " + Constants.TABBLE_RESULT_SEND);
-                db.setTransactionSuccessful();
-                db.endTransaction();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            FlowManager.getDatabase(AppDatabase.class).executeTransaction(databaseWrapper -> {
+                for (int i = 0; i < list.size(); i++) {
+                    list.get(i).delete();
+                    SQLite.delete(SendReultBean.class)
+                            .where(SendReultBean_Table.mianId.eq(list.get(i).getMainId()));
+                }
+            });
 
 
             list.clear();
-            String sql = "select * from " + Constants.TABBLE_MAIN_SEND;
-            cursor = DbManager.queryBySQL(db, sql, null);
-            list.addAll(DbManager.getMainList(cursor));
+            list.addAll(SQLite.select().from(Main.class).queryList());
             if (adapter == null) {
                 return;
             }

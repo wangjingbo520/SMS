@@ -2,19 +2,16 @@ package com.tools.sms.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.view.View;
+import android.util.Log;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.tools.sms.R;
 import com.tools.sms.adapter.DetailAdapter;
 import com.tools.sms.base.BaseActivity;
-import com.tools.sms.base.Constants;
-import com.tools.sms.bean.SendResultBean;
-import com.tools.sms.db.dbs.DbManager;
-import com.tools.sms.tools.ToastUtil;
+import com.tools.sms.bean.SendReultBean;
+import com.tools.sms.bean.SendReultBean_Table;
 import com.tools.sms.views.TitleView;
 
 import java.util.List;
@@ -34,11 +31,9 @@ public class DetailSendActivity extends BaseActivity {
     @BindView(R.id.listView)
     ListView listView;
 
-    private SQLiteDatabase db;
-    private Cursor cursor;
-    private List<SendResultBean> totalList;
+    private List<SendReultBean> totalList;
 
-    private int sum;//总的数据数目
+    private long sum;//总的数据数目
     private int pageSize = 20; //每页有15条数据
     private int pageNum; // 一共有多少页
     private int currentPage = 1; //当期页码
@@ -63,14 +58,22 @@ public class DetailSendActivity extends BaseActivity {
     @Override
     protected void initView() {
         titleView.setTitle("发送详情");
-       // titleView.setRightTitle("一键重发");
+        // titleView.setRightTitle("一键重发");
         titleView.getBackView().setOnClickListener(v -> finish());
-        db = DbManager.getInstance(this).getReadableDatabase();
-        sum = DbManager.getTotalNum(db, Constants.TABBLE_RESULT_SEND);
+
         mainId = getIntent().getIntExtra("mainID", 0);
+
+        sum = SQLite.select().from(SendReultBean.class)
+                .where(SendReultBean_Table.mianId.eq(mainId)).queryList().size();
+
         pageNum = (int) Math.ceil(sum / (double) pageSize); //向上取整
+
         if (currentPage == 1) {
-            totalList = DbManager.getListByCurrentPage(db, Constants.TABBLE_RESULT_SEND, currentPage, pageSize, mainId);
+            totalList = SQLite.select().from(SendReultBean.class)
+                    .where(SendReultBean_Table.mianId.eq(mainId))
+                    .limit(pageSize)
+                    .offset(0)
+                    .queryList();
         }
 
         detailAdapter = new DetailAdapter(this, totalList);
@@ -84,8 +87,10 @@ public class DetailSendActivity extends BaseActivity {
                     if (currentPage < pageNum) {
                         currentPage++;
                         // 根据最新的页码加载获取集合存储到数据源中
-                        totalList.addAll(DbManager.getListByCurrentPage(db, Constants.TABBLE_RESULT_SEND,
-                                currentPage, pageSize, mainId));
+                        List<SendReultBean> sendReultBeans = SQLite.select().from(SendReultBean.class)
+                                .where(SendReultBean_Table.mianId.eq(mainId))
+                                .limit(pageSize).offset(currentPage * pageSize).queryList();
+                        totalList.addAll(sendReultBeans);
                         detailAdapter.notifyDataSetChanged();
                     }
                 }
@@ -96,14 +101,6 @@ public class DetailSendActivity extends BaseActivity {
                 isDivPage = ((firstVisibleItem + visibleItemCount) == totalItemCount);
             }
         });
-
-      //  titleView.getRightView()
-//        titleView.getRightView().setOnClickListener(view -> {
-//            ToastUtil.showMessage("将在下个版本上线");
-//
-//        });
-
-
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.tools.sms;
 import android.app.Activity;
 import android.app.Application;
 
+import com.raizlabs.android.dbflow.config.FlowManager;
 import com.tools.sms.base.Constants;
 import com.tools.sms.tools.SPUtils;
 
@@ -25,6 +26,8 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         myApp = this;
+
+        FlowManager.init(this);
 
         SPUtils.getInstance().put(Constants.TIEM_INTERVAL, 5);
 

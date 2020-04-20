@@ -1,7 +1,6 @@
 package com.tools.sms.activity;
 
 import android.annotation.SuppressLint;
-import android.database.sqlite.SQLiteDatabase;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -12,7 +11,7 @@ import android.widget.TextView;
 import com.tools.sms.R;
 import com.tools.sms.base.BaseActivity;
 import com.tools.sms.bean.XLSUserBean;
-import com.tools.sms.db.dbs.DbManager;
+import com.tools.sms.bean.Template;
 import com.tools.sms.tools.ToastUtil;
 import com.tools.sms.views.TitleView;
 
@@ -66,11 +65,10 @@ public class AddTemplateActivity extends BaseActivity {
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dt1 = new SimpleDateFormat("yyyy/MM/dd");
         Date date = new Date();
-        String sql = "insert into template(content,time) " +
-                "values(?,?)";
-        SQLiteDatabase db = DbManager.getInstance(this).getReadableDatabase();
-        db.execSQL(sql, new String[]{content, dt1.format(date)});
-        db.close();
+        Template template = new Template();
+        template.setTime(dt1.format(date));
+        template.setContent(content);
+        template.save();
         ToastUtil.showMessage("恭喜您，短信模板添加成功，可以在“我的短信模板”中查看”");
         finish();
     }

@@ -1,24 +1,23 @@
 package com.tools.sms.activity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.android.volley.Request;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.tools.sms.MyApp;
 import com.tools.sms.R;
 import com.tools.sms.base.BaseActivity;
 import com.tools.sms.base.Constants;
 import com.tools.sms.bean.UserBean;
 import com.tools.sms.bean.VersionApp;
-import com.tools.sms.db.dbs.DbManager;
+import com.tools.sms.bean.Main;
+import com.tools.sms.bean.SendReultBean;
 import com.tools.sms.http.InterfaceMethod;
 import com.tools.sms.http.RequestHandler;
 import com.tools.sms.tools.DataCleanManager;
@@ -130,7 +129,9 @@ public class MyActivity extends BaseActivity {
         builder.setTitle("提示");
         builder.setMessage("您确定要清除本地短信记录数据吗？");
         builder.setPositiveButton("确定", (dialogInterface, i) -> {
-            DbManager.deleteTableAndCreateTable();
+
+            SQLite.delete(Main.class);
+            SQLite.delete(SendReultBean.class);
             DataCleanManager.clearAllCache(this);
             try {
                 //只清空了表

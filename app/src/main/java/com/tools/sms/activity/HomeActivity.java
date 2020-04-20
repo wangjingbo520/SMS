@@ -40,7 +40,7 @@ public class HomeActivity extends BaseActivity implements
 
     private int REQUESTCODE_FROM_ACTIVITY = 1000;
 
-    private int[] imags = {R.mipmap.add, R.mipmap.mb, R.mipmap.mbs, R.mipmap.jl, R.mipmap.sm, R.mipmap.my};
+    private int[] imags = {R.mipmap.add, R.mipmap.mb, R.mipmap.mbs, R.mipmap.jl, R.mipmap.sm, R.mipmap.yh};
 
 
     @Override
