@@ -152,7 +152,7 @@ public class SendSMSService extends Service {
                     Log.e("发送间隔是：", "run: " + stopTime);
                     //第一条短信的时候暂停
                     if (xlsUserBeans.size() > 1 && i == 0) {
-                        sleep(1000);
+                        //sleep(1000);
                     } else {
                         sleep(stopTime * 1000);
                     }

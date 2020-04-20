@@ -13,6 +13,7 @@ import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.tools.sms.R;
 import com.tools.sms.adapter.Templatedapter;
 import com.tools.sms.base.BaseActivity;
+import com.tools.sms.bean.Template_Table;
 import com.tools.sms.bean.XLSUserBean;
 import com.tools.sms.bean.Template;
 import com.tools.sms.tools.ToastUtil;
@@ -73,7 +74,7 @@ public class TemplateTextActivity extends BaseActivity implements Templatedapter
     @Override
     protected void onResume() {
         super.onResume();
-        this.templates = SQLite.select().from(Template.class).queryList();
+        templates = SQLite.select().from(Template.class).orderBy(Template_Table.id, false).queryList();
         templatedapter = new Templatedapter(this, this.templates);
         recyclerview.setAdapter(templatedapter);
 

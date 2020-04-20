@@ -103,41 +103,25 @@ public class SmsEditActivity extends BaseActivity {
                 //扩展字段1
                 editable = editText.getText();
                 index = editText.getSelectionStart();
-                if (tag == 1) {
-                    editable.insert(index, xlsUserBean.getXlsOne());
-                } else {
-                    editable.insert(index, "{|e1|}");
-                }
+                editable.insert(index, "{|e1|}");
                 break;
             case R.id.tv_expand_2:
                 //扩展字段2
                 editable = editText.getText();
                 index = editText.getSelectionStart();
-                if (tag == 1) {
-                    editable.insert(index, xlsUserBean.getXlsTwo());
-                } else {
-                    editable.insert(index, "{|e2|}");
-                }
+                editable.insert(index, "{|e2|}");
                 break;
             case R.id.tv_expand_3:
                 //扩展字段3
                 editable = editText.getText();
                 index = editText.getSelectionStart();
-                if (tag == 1) {
-                    editable.insert(index, xlsUserBean.getXlsThree());
-                } else {
-                    editable.insert(index, "{|e3|}");
-                }
+                editable.insert(index, "{|e3|}");
                 break;
             case R.id.tv_expand_4:
                 //扩展字段4
                 editable = editText.getText();
                 index = editText.getSelectionStart();
-                if (tag == 1) {
-                    editable.insert(index, xlsUserBean.getXlsFour());
-                } else {
-                    editable.insert(index, "{|e4|}");
-                }
+                editable.insert(index, "{|e4|}");
                 break;
             case R.id.tv_sure:
                 commit();
@@ -207,27 +191,36 @@ public class SmsEditActivity extends BaseActivity {
     };
 
 
+    //显示下面模板内容
     private void showResult(String inputStr) {
-
         this.content = inputStr;
         if (inputStr.contains("{|t|}")) {
             content = content.replace("{|t|}", day);
         }
 
         if (inputStr.contains("{|e1|}")) {
-            content = content.replace("{|e1|}", "12345678910");
+            if (tag == 1) {
+                content = content.replace("{|e1|}", xlsUserBean.getXlsOne());
+            }
         }
 
         if (inputStr.contains("{|e2|}")) {
-            content = content.replace("{|e2|}", "张三");
+            if (tag == 1) {
+                content = content.replace("{|e2|}", xlsUserBean.getXlsTwo());
+            }
         }
 
         if (inputStr.contains("{|e3|}")) {
-            content = content.replace("{|e3|}", "2000");
+            if (tag == 1) {
+                content = content.replace("{|e3|}", xlsUserBean.getXlsThree());
+            }
         }
 
         if (inputStr.contains("{|e4|}")) {
-            content = content.replace("{|e4|}", "4000");
+            if (tag == 1) {
+                content = content.replace("{|e4|}", xlsUserBean.getXlsFour());
+            }
+
         }
 
         bubble.setText(htmlTextUtils(content));

@@ -55,6 +55,7 @@ public class DetailAdapter extends BaseAdapter {
             viewHolder.tvDate = (TextView) convertView.findViewById(R.id.tvDate);
             viewHolder.tvStatus = (TextView) convertView.findViewById(R.id.tvStatus);
             viewHolder.tvTip = (TextView) convertView.findViewById(R.id.tvTip);
+            viewHolder.phoneNumber = (TextView) convertView.findViewById(R.id.phoneNumber);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -62,7 +63,8 @@ public class DetailAdapter extends BaseAdapter {
         viewHolder.tvPositon.setText(position + 1 + ".");
         viewHolder.tvDate.setText(list.get(position).getTime());
 
-        //failure
+        viewHolder.phoneNumber.setText("(接收方：" + list.get(position).getPhoneNumber() + ")");
+
         int status = list.get(position).getTag();
         if (status == 0) {
             viewHolder.tvStatus.setText("发送失败");
@@ -81,7 +83,7 @@ public class DetailAdapter extends BaseAdapter {
             viewHolder.tvTip.setVisibility(View.GONE);
         }
 
-        viewHolder.tvContent.setText(content);
+        viewHolder.tvContent.setText("内容：" + content);
 
         return convertView;
     }
@@ -92,5 +94,6 @@ public class DetailAdapter extends BaseAdapter {
         TextView tvDate;
         TextView tvStatus;
         TextView tvTip;
+        TextView phoneNumber;
     }
 }

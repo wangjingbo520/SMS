@@ -53,14 +53,9 @@ public class SendTheRecordActivity extends BaseActivity {
     @SuppressLint("SetTextI18n")
     @Override
     protected void initData() {
-        OrderBy orderBy = OrderBy.fromNameAlias(NameAlias.of("mainId")).descending();
         list = SQLite.select()
-                .from(Main.class).orderBy(orderBy)
+                .from(Main.class).orderBy(Main_Table.mainId, false)
                 .queryList();
-
-        for (int i = 0; i < list.size(); i++) {
-            Log.e("====>", "initData: "+list.get(i).toString() );
-        }
 
         if (list.size() < 1) {
             ToastUtil.showMessage(getString(R.string.hasno));
@@ -81,7 +76,7 @@ public class SendTheRecordActivity extends BaseActivity {
     protected void initView() {
         titleView.setTitle("发送记录");
         titleView.getBackView().setOnClickListener(v -> finish());
-        titleView.setRightTitle("清空");
+        titleView.setRightTitle("一键清空");
         builder = new AlertDialog.Builder(this);
         builder.setTitle("提示");
         builder.setIcon(R.mipmap.logo);
@@ -111,9 +106,11 @@ public class SendTheRecordActivity extends BaseActivity {
 
             FlowManager.getDatabase(AppDatabase.class).executeTransaction(databaseWrapper -> {
                 for (int i = 0; i < list.size(); i++) {
-                    list.get(i).delete();
+                    SQLite.delete(Main.class)
+                            .where(Main_Table.mainId.eq(list.get(i).getMainId())).execute();
+
                     SQLite.delete(SendReultBean.class)
-                            .where(SendReultBean_Table.mianId.eq(list.get(i).getMainId()));
+                            .where(SendReultBean_Table.mianId.eq(list.get(i).getMainId())).execute();
                 }
             });
 

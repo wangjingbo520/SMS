@@ -22,6 +22,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+
 /**
  * @author w（C）
  * describe
@@ -63,7 +64,7 @@ public class AdviceActivity extends BaseActivity {
 
     private void postData(String content) {
         Map<String, String> params = new HashMap<>();
-        params.put("username", SPUtils.getInstance().getString(Constants.USER_NAME,""));
+        params.put("username", SPUtils.getInstance().getString(Constants.USER_NAME, ""));
         params.put("advice", content);
         RequestHandler.addRequest(Request.Method.POST, this, mHandler, Constants.CODE_RESULT,
                 params, null, true, InterfaceMethod.USER_ADVICE);

@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.telephony.SmsManager;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -108,14 +109,12 @@ public class ExcellSendActivity extends BaseActivity {
      */
     private boolean isSendSms = false;
 
-
     //是否发送了
     private volatile boolean hasSendsMS = false;
 
-    private int sucessSize = 0;
-    private int failedSize = 0;
+    private volatile int sucessSize = 0;
+    private volatile int failedSize = 0;
 
-    private ProgressDialog progressDialog;
 
     private EasyThread executor = null;
 
@@ -140,6 +139,9 @@ public class ExcellSendActivity extends BaseActivity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 , WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("正在退出中...");
+
         executor = EasyThread.Builder
                 .createFixed(4)
                 .setPriority(Thread.MAX_PRIORITY)
@@ -155,10 +157,6 @@ public class ExcellSendActivity extends BaseActivity {
             customizedProgressBar.setMaxCount(beans.size());
             tvStatus.setText("发送进度: 0/" + beans.size());
         }
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("正在退出中...");
-
 
         receiver = new SMSStatusReceiver();
         IntentFilter filter = new IntentFilter();
@@ -183,15 +181,13 @@ public class ExcellSendActivity extends BaseActivity {
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dt1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
-        tempMainList = SQLite.select().from(Main.class).orderBy(Main_Table.mainId, false).queryList();
-
+        tempMainList = SQLite.select().from(Main.class).queryList();
         main = new Main();
         main.setTime(dt1.format(date));
-
         if (tempMainList.size() == 0) {
             main.setMainId(1);
         } else {
-            main.setMainId(tempMainList.get(0).getMainId() + 1);
+            main.setMainId(tempMainList.get(tempMainList.size() - 1).getMainId() + 1);
         }
 
         infos = new HashMap<>();
@@ -366,7 +362,7 @@ public class ExcellSendActivity extends BaseActivity {
                             et_status.append(Html.fromHtml("向 "
                                     + phoneNumber + " 发送短信<font color='green'>成功</font><br>"));
                             sucessSize++;
-                            startThread(content_s, phoneNumber, sucessSize, failedSize, 1);
+                            startThread(content_s, phoneNumber, 1);
                         }
 
                         tv_send_result.setText("发送结果：成功" + sucessSize + "条  失败" + failedSize + "条");
@@ -393,7 +389,7 @@ public class ExcellSendActivity extends BaseActivity {
                             sendReultBean.setMianId(main.getMainId());
                             sendReultBean.setTag(0);
                             failedSize++;
-                            startThread(content_f, phoneNumber_1, sucessSize, failedSize, 0);
+                            startThread(content_f, phoneNumber_1, 0);
                         }
 
                         tv_send_result.setText("成功:" + sucessSize + "条  失败" + failedSize + "条");
@@ -426,10 +422,31 @@ public class ExcellSendActivity extends BaseActivity {
         }
     }
 
+    private boolean isSaveMain = false;
+
+    private void startThread(String content, String phoneNumber, int tag) {
+        executor.execute(() -> {
+            SendReultBean reultBean = new SendReultBean();
+            reultBean.setContent(content);
+            reultBean.setMianId(main.getMainId());
+            reultBean.setTag(tag);
+            reultBean.setPhoneNumber(phoneNumber);
+            reultBean.save();
+
+            main.setSucess(sucessSize);
+            main.setFailed(failedSize);
+            if (isSaveMain) {
+                main.update();
+            } else {
+                main.save();
+                isSaveMain = true;
+            }
+        });
+    }
+
 
     @Override
     public void onDestroy() {
-        //发送过短信
         if (receiver != null) {
             unregisterReceiver(receiver);
         }
@@ -437,6 +454,8 @@ public class ExcellSendActivity extends BaseActivity {
         if (service != null) {
             stopService(service);
         }
+
+        executor = null;
 
         super.onDestroy();
     }
@@ -470,26 +489,6 @@ public class ExcellSendActivity extends BaseActivity {
     }
 
 
-    private void reLogin(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setIcon(R.mipmap.logo);
-        builder.setTitle("提示！");
-        builder.setMessage(message);
-        builder.setPositiveButton("确定", (dialog, which) -> {
-            String username = SPUtils.getInstance().getString(Constants.USER_NAME);
-            String password = SPUtils.getInstance().getString(Constants.USER_PASSWORD);
-            Map<String, String> params = new HashMap<>();
-            params.put("username", username);
-            params.put("password", password);
-            RequestHandler.addRequest(Request.Method.POST, this, mHandler, Constants.CODE_RESULT,
-                    params, null, false, InterfaceMethod.EXIT_LOGIN);
-        });
-
-        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
-        builder.show();
-    }
-
-
     @Override
     public void onSuceess(String response, String interfaceMethod) {
         super.onSuceess(response, interfaceMethod);
@@ -508,26 +507,5 @@ public class ExcellSendActivity extends BaseActivity {
         }
     }
 
-    private boolean isSaveMain = false;
-
-    private void startThread(String content, String phoneNumber, int sucessSize, int failedSize, int tag) {
-        executor.execute(() -> {
-            SendReultBean reultBean = new SendReultBean();
-            reultBean.setContent(content);
-            reultBean.setMianId(main.getMainId());
-            reultBean.setTag(tag);
-            reultBean.setPhoneNumber(phoneNumber);
-            reultBean.save();
-
-            main.setSucess(sucessSize);
-            main.setFailed(failedSize);
-            if (isSaveMain) {
-                main.update();
-            } else {
-                main.save();
-                isSaveMain = true;
-            }
-        });
-    }
 
 }

@@ -2,6 +2,7 @@ package com.tools.sms.base;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
 import com.azhon.appupdate.config.UpdateConfiguration;
 import com.azhon.appupdate.listener.OnButtonClickListener;
 import com.azhon.appupdate.listener.OnDownloadListener;
@@ -27,11 +29,14 @@ import com.tools.sms.bean.VersionApp;
 import com.tools.sms.http.IHandleMessage;
 import com.tools.sms.http.InterfaceMethod;
 import com.tools.sms.http.MyVolleyHandler;
+import com.tools.sms.http.RequestHandler;
 import com.tools.sms.tools.DeviceIdUtils;
 import com.tools.sms.tools.SPUtils;
 import com.tools.sms.tools.statusbartils.Eyes;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 
@@ -46,6 +51,8 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
     public MyVolleyHandler<BaseActivity> mHandler;
     public Gson gson;
     public String device_id;
+
+    public ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -148,6 +155,25 @@ public abstract class BaseActivity extends AppCompatActivity implements IHandleM
             Intent intent = new Intent(mActivity, PayActivity.class);
             startActivityForResult(intent, 1000);
         });
+        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
+    public void reLogin(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.mipmap.logo);
+        builder.setTitle("提示！");
+        builder.setMessage(message);
+        builder.setPositiveButton("确定", (dialog, which) -> {
+            String username = SPUtils.getInstance().getString(Constants.USER_NAME);
+            String password = SPUtils.getInstance().getString(Constants.USER_PASSWORD);
+            Map<String, String> params = new HashMap<>();
+            params.put("username", username);
+            params.put("password", password);
+            RequestHandler.addRequest(Request.Method.POST, this, mHandler, Constants.CODE_RESULT,
+                    params, null, false, InterfaceMethod.EXIT_LOGIN);
+        });
+
         builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
