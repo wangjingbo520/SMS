@@ -140,7 +140,7 @@ public class ExcellSendActivity extends BaseActivity {
                 , WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("正在退出中...");
+        progressDialog.setMessage("稍等片刻...");
 
         executor = EasyThread.Builder
                 .createFixed(4)
@@ -201,6 +201,13 @@ public class ExcellSendActivity extends BaseActivity {
         }
     };
 
+    private Runnable tipRun = new Runnable() {
+        @Override
+        public void run() {
+            progressDialog.dismiss();
+        }
+    };
+
     @Override
     protected int getContentLayout() {
         return R.layout.activity_excell_send;
@@ -220,9 +227,6 @@ public class ExcellSendActivity extends BaseActivity {
                     stopService(service);
                 }
 
-                if (hasSendsMS) {
-                    //updatedMain();
-                }
                 myHandler.postDelayed(mRunnable, 1000);
                 break;
             case R.id.bubble:
@@ -240,11 +244,16 @@ public class ExcellSendActivity extends BaseActivity {
             case R.id.Pause:
                 if (service != null) {
                     if (SendSMSService.pause) {
+                        progressDialog.show();
                         SendSMSService.resumeThread();
                         Pause.setText("暂停发送");
+                        myHandler.postDelayed(tipRun, 4000);
+
                     } else {
+                        progressDialog.show();
                         Pause.setText("继续发送");
                         SendSMSService.pauseThread();
+                        myHandler.postDelayed(tipRun, 4000);
                     }
                 } else {
                     ToastUtil.showMessage("您还没开启发送任务...");
@@ -335,7 +344,6 @@ public class ExcellSendActivity extends BaseActivity {
         } else {
             startService(service);
         }
-
     }
 
 
@@ -456,6 +464,9 @@ public class ExcellSendActivity extends BaseActivity {
         }
 
         executor = null;
+
+        myHandler.removeCallbacks(mRunnable);
+        myHandler.removeCallbacks(tipRun);
 
         super.onDestroy();
     }

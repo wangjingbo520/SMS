@@ -74,14 +74,9 @@ public class SendSMSService extends Service {
                 msg = bundle.getString("content", "未知短信内容");
                 if (beans != null) {
                     xlsUserBeans.addAll(beans);
-                    try {
-                        Thread.sleep(1000);
-                        pause_intent = new Intent();
-                        pause_intent.setAction("pause");
-                        smsThread.start();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    pause_intent = new Intent();
+                    pause_intent.setAction("pause");
+                    smsThread.start();
                 }
             }
         }
