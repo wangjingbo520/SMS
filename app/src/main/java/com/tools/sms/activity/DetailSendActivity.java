@@ -12,6 +12,7 @@ import com.tools.sms.adapter.DetailAdapter;
 import com.tools.sms.base.BaseActivity;
 import com.tools.sms.bean.SendReultBean;
 import com.tools.sms.bean.SendReultBean_Table;
+import com.tools.sms.tools.ToastUtil;
 import com.tools.sms.views.TitleView;
 
 import java.util.List;
@@ -82,16 +83,16 @@ public class DetailSendActivity extends BaseActivity {
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-                //已经分页并且当前滚动状态为停止滚动了
                 if (isDivPage && AbsListView.OnScrollListener.SCROLL_STATE_IDLE == scrollState) {
                     if (currentPage < pageNum) {
-                        currentPage++;
-                        // 根据最新的页码加载获取集合存储到数据源中
                         List<SendReultBean> sendReultBeans = SQLite.select().from(SendReultBean.class)
                                 .where(SendReultBean_Table.mianId.eq(mainId))
                                 .limit(pageSize).offset(currentPage * pageSize).queryList();
+                        currentPage++;
                         totalList.addAll(sendReultBeans);
                         detailAdapter.notifyDataSetChanged();
+                    } else {
+                        ToastUtil.showMessage("没有更多数据了");
                     }
                 }
             }
