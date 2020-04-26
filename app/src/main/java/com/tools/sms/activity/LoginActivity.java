@@ -75,7 +75,6 @@ public class LoginActivity extends BaseActivity implements EditDialog.Lisentense
                 etPasword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 isShow = true;
             }
-
         });
     }
 

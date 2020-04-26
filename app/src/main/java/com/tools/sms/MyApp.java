@@ -29,7 +29,7 @@ public class MyApp extends Application {
 
         FlowManager.init(this);
 
-        SPUtils.getInstance().put(Constants.TIEM_INTERVAL, 5);
+        SPUtils.getInstance().put(Constants.TIEM_INTERVAL, 7);
 
     }
 

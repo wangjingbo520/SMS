@@ -7,10 +7,11 @@ package com.tools.sms.http;
 public class InterfaceMethod {
 
     //dev
-   // public static final String base_url = "http://192.168.43.79:9090/";
+    // public static final String base_url = "http://192.168.43.79:9090/";
 
     //pro
-   public static final String base_url = "http://106.13.102.216/";
+    //public static final String base_url = "http://106.13.102.216/";
+    public static final String base_url = "http://www.smss.online/";
 
     public static final String PAY_URL = "https://w.url.cn/s/A9SuogJ";
 

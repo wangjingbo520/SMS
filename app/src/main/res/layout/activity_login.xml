@@ -53,7 +53,8 @@
                 android:text=""
                 android:textColor="@color/textColor3"
                 android:textColorHint="@color/textColor9"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <View
@@ -87,7 +88,8 @@
                 android:singleLine="true"
                 android:textColor="@color/textColor3"
                 android:textColorHint="@color/textColor9"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <ImageView
                 android:id="@+id/yj"

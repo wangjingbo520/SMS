@@ -166,9 +166,9 @@
                 android:minHeight="100dp"
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp"
-                android:textColor="#333333"
+                android:textColor="@color/black"
                 android:textSize="16sp"
-                app:BubbleView_backgroundColor="#f5f5f5"
+                app:BubbleView_backgroundColor="#cccccc"
                 app:BubbleView_leftTextPadding="10dp"
                 app:BubbleView_rightTextPadding="10dp" />
 

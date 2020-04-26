@@ -19,7 +19,7 @@ public class XLSUserBean implements Serializable {
         this.xlsFour = "扩展字段4";
         this.xlsFive = "扩展字段5";
 
-        phoneNumber = "空号码";
+        phoneNumber = "";
 
     }
 

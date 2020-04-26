@@ -4,17 +4,14 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.SmsManager;
-import android.util.Log;
 
 import com.tools.sms.R;
 import com.tools.sms.activity.ExcellSendActivity;
 import com.tools.sms.base.Constants;
-import com.tools.sms.bean.UserBean;
 import com.tools.sms.bean.XLSUserBean;
 import com.tools.sms.tools.SPUtils;
 
@@ -88,6 +85,7 @@ public class SendSMSService extends Service {
 
         @Override
         public void run() {
+            int stopTime = SPUtils.getInstance().getInt(Constants.TIEM_INTERVAL);
             SmsManager sms = SmsManager.getDefault();
             for (int i = 0; i < xlsUserBeans.size(); i++) {
                 if (isStopService) {
@@ -143,11 +141,8 @@ public class SendSMSService extends Service {
                                 deliveredIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT);
                 try {
-                    int stopTime = SPUtils.getInstance().getInt(Constants.TIEM_INTERVAL);
-                    Log.e("发送间隔是：", "run: " + stopTime);
-                    //第一条短信的时候暂停
                     if (xlsUserBeans.size() > 1 && i == 0) {
-                        //sleep(1000);
+                        sleep(500);
                     } else {
                         sleep(stopTime * 1000);
                     }
